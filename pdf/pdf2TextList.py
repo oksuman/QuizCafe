@@ -2,59 +2,24 @@
 # .pdf -> leveled string structure
 # using pdfminer & pdfplumber
 
-from dataclasses import dataclass
 import pdfplumber
 import pdfminer
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import *
-
-@dataclass
-class TextLine:
-    text: str
-    size: int            
-    location: float       # point where textline starts
-    keyword_set: list     # based on changes of color or size
-    page_num : int        # page number that textline came from 
-
+from SelectedStack import SelectedStack
+from PdfUtil import *
+from Default import *
+    
 # list of TextLine
 TextList = []
-
-def pick_default_stroking_color(chars):
-    stroking_color_list = {}
-    for char_plumber in chars:
-        if char_plumber['stroking_color'] in stroking_color_list:
-            stroking_color_list[char_plumber['stroking_color']] += 1
-        else:
-            stroking_color_list[char_plumber['stroking_color']] = 0
-    
-    return max(stroking_color_list,key=stroking_color_list.get)
-
-def pick_default_color(chars):
-    color_list = {}
-    for char_plumber in chars:
-        if str(char_plumber['non_stroking_color']) in color_list:
-            color_list[str(char_plumber['non_stroking_color'])] += 1
-        else:
-            color_list[str(char_plumber['non_stroking_color'])] = 0
- 
-    return max(color_list,key=color_list.get)
-
-def pick_default_font(chars):
-    font_list = {}
-    for char_plumber in chars:
-        if char_plumber['stroking_color'] in font_list:
-            font_list[char_plumber['fontname']] += 1
-        else:
-            font_list[char_plumber['fontname']] = 0
-    
-    return max(font_list,key=font_list.get)
-
+# lsit of Theme
+ThemeList = []
 
 def detect_diff(chars, textline, index, page_num, default_color, default_font):
     
     # keyword checking stacks
     # FontDiffStack = []
-    ColorDiffStack = []
+    ColorDiffStack = SelectedStack()
     # keyword checking status
     # FontKeyword = False
     ColorKeyword = False
@@ -72,16 +37,15 @@ def detect_diff(chars, textline, index, page_num, default_color, default_font):
             if current_color != str(chars[index]['non_stroking_color']) and ColorKeyword == False:
                 current_color = str(chars[index]['non_stroking_color'])
                 ColorKeyword = True
-                ColorDiffStack.append(char_miner)
+                ColorDiffStack.push(char_miner)
             # continue keyword searching
             elif current_color == str(chars[index]['non_stroking_color']) and ColorKeyword == True:
-                ColorDiffStack.append(char_miner)
+                ColorDiffStack.push(char_miner)
             # stop keyword searching
             elif current_color != str(chars[index]['non_stroking_color']) and ColorKeyword == True:
                 current_color = str(chars[index]['non_stroking_color'])
                 ColorKeyword = False
-                keyword_set.append(''.join(ColorDiffStack))
-                ColorDiffStack.clear()
+                keyword_set.append(ColorDiffStack.pop_all())
             else:
                 pass
                         
@@ -129,10 +93,10 @@ def detect_diff(chars, textline, index, page_num, default_color, default_font):
                 if char_miner == '\n':
                     current_color = default_color
                     ColorKeyword = False
-                    keyword_set.append(''.join(ColorDiffStack))
-                    ColorDiffStack.clear()  
+                    keyword_set.append(ColorDiffStack.pop_all())
+                      
                 elif char_miner == ' ':
-                    ColorDiffStack.append(' ')
+                    ColorDiffStack.push(' ')
                 else:
                     raise Exception('mismatching detected!!')
                     
@@ -157,6 +121,43 @@ def detect_diff(chars, textline, index, page_num, default_color, default_font):
     
     return index 
  
+ 
+# Korean Traditional Folk Game
+def Tuho(TextList):
+    next_page_num = 1
+    while TextList:
+        current_page_num = TextList[0].page_num
+        max_font_size = 0
+        arrows = Arrows()
+        theme = Theme("", arrows) 
+        
+        while current_page_num == next_page_num:
+            textline = TextList.pop(0)
+            if max_font_size < textline.size:
+                max_font_size = textline.size         
+                theme.quiver = textline.text
+             
+            theme.arrows.add(arrow(textline.text, textline.keyword_set))
+            if TextList: 
+                next_page_num = TextList[0].page_num
+            else:
+                break
+        
+        is_present_quiver = False
+        if ThemeList:
+            for set_theme in ThemeList:
+                if set_theme.quiver == theme.quiver:
+                    is_present_quiver = True
+                    set_theme.arrows.array.extend(theme.arrows.array)
+                    
+            if is_present_quiver:
+                pass
+            else:
+                ThemeList.append(theme)
+
+        else:
+            ThemeList.append(theme)   
+        
  
 with open('pdf/samples/mmm.pdf', 'rb') as input_file:
     with pdfplumber.PDF(input_file) as pdf_file:
@@ -210,13 +211,10 @@ with open('pdf/samples/mmm.pdf', 'rb') as input_file:
             #     print(page_number)
             #     print(pending_list)
             #     raise Exception('pendig list is not empty!!')
-                    
-                                                
-# Korean Traditional Folk Game
-def Tuho(TextList):
-    pass
-    
-    
+
+ 
+Tuho(TextList)
+
 with open("output.txt","w") as output:
     for textline in TextList:
         output.write(repr(textline.text))
@@ -230,3 +228,21 @@ with open("output.txt","w") as output:
         output.write(str(textline.page_num))
         output.write("\n")
         
+                    
+                                                
+with open("output2.txt","w") as output2:
+    num = 1
+    for theme in ThemeList:
+        output2.write("주제 " + str(num) + " : " + theme.quiver)
+        for arrow in theme.arrows.array:
+            output2.write("문장 : " + arrow.text)
+            output2.write("키워드 : ")
+            for keyword in arrow.keyword_set:
+                output2.write(keyword)
+                output2.write(" ")
+            output2.write('\n')
+        output2.write('\n')
+        num += 1
+                
+            
+     
