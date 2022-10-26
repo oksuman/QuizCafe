@@ -2,3 +2,5 @@ test.py
 spare.py
 output.txt
 output2.txt
+
+*.json
