@@ -5,9 +5,11 @@ class TextLine:
     text: str
     size: int            
     location: float       # point where textline starts
-    keyword_set: list     # based on changes of color or size
+    keyword_set: set      # based on changes of color or size
     page_num : int        # page number that textline came from 
-    
+    box_num : int
+
+
 @dataclass
 class Theme:
     quiver: str
@@ -16,7 +18,7 @@ class Theme:
 @dataclass
 class arrow:
     text: str
-    keyword_set: list
+    keyword_set: set
     
 class Arrows:
     def __init__(self):

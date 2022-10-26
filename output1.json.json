@@ -1,0 +1,685 @@
+{
+	"output1.json": [
+		{
+			"Theme": "Mobile Application Development",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Joon-Woo Lee",
+					"Keyword": []
+				},
+				{
+					"Text": "School of Computer Science and EngineeringCollege of SoftwareChung-Ang University",
+					"Keyword": []
+				},
+				{
+					"Text": "Week 6. Using Keys / Team Project",
+					"Keyword": [
+						"Week 6 Using Keys  Team Project"
+					]
+				}
+			]
+		},
+		{
+			"Theme": "How the Flutter uses keys",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "How the Flutter uses keys",
+					"Keyword": [
+						"How the Flutter uses keys"
+					]
+				},
+				{
+					"Text": "2",
+					"Keyword": []
+				},
+				{
+					"Text": "• Assume that we have one parent widget (e.g. Row or ListView) and many children widgets with the same type (e.g. Padding with Container orListTile)• In the subtree of each child widget, there is at least one stateful widget.• Then we have given a change to the children widgets (e.g. swapping, inserting, or removing)",
+					"Keyword": []
+				},
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "How the Flutter uses keys",
+					"Keyword": [
+						"How the Flutter uses keys"
+					]
+				},
+				{
+					"Text": "3",
+					"Keyword": [
+						"3"
+					]
+				},
+				{
+					"Text": "• Then, the key of some Elements doesn’t match the key of the corresponding widget.• This causes Flutter to deactivate those elements and remove the references to the Tile Elements in the Element Tree, starting with the first one that doesn’t match.• Flutter looks through to non-matched children of the Row for an element with the correct corresponding key.• It finds a match and updates its reference to the corresponding widget.",
+					"Keyword": [
+						"Row"
+					]
+				},
+				{
+					"Text": "Fall 2022",
+					"Keyword": []
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": []
+				},
+				{
+					"Text": "How the Flutter uses keys",
+					"Keyword": []
+				},
+				{
+					"Text": "4",
+					"Keyword": [
+						"4"
+					]
+				}
+			]
+		},
+		{
+			"Theme": "Where we put the keys (Local keys)",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Where we put the keys (Local keys)",
+					"Keyword": [
+						"Where we put the keys Local keys"
+					]
+				},
+				{
+					"Text": "5",
+					"Keyword": [
+						"5"
+					]
+				},
+				{
+					"Text": "• If you need to add keys to your app, you should add them at the top ofthe widget subtree with the state you need to preserve.• A common mistake: Putting a key on the first stateful widget.• Flutter’s element-to-widget-matching algorithm looks at one level in the tree at a time.• When matching up widget to elements, Flutter only looks for key matches within a particular level in the tree.",
+					"Keyword": []
+				}
+			]
+		},
+		{
+			"Theme": "Where we put the keys",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": []
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": []
+				},
+				{
+					"Text": "Where we put the keys",
+					"Keyword": []
+				},
+				{
+					"Text": "6",
+					"Keyword": [
+						"6"
+					]
+				},
+				{
+					"Text": "Fall 2022",
+					"Keyword": []
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": []
+				},
+				{
+					"Text": "Where we put the keys",
+					"Keyword": []
+				},
+				{
+					"Text": "7",
+					"Keyword": [
+						"7"
+					]
+				},
+				{
+					"Text": "Fall 2022",
+					"Keyword": []
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": []
+				},
+				{
+					"Text": "Where we put the keys",
+					"Keyword": []
+				},
+				{
+					"Text": "8",
+					"Keyword": [
+						"8"
+					]
+				},
+				{
+					"Text": "Fall 2022",
+					"Keyword": []
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": []
+				},
+				{
+					"Text": "Where we put the keys",
+					"Keyword": []
+				},
+				{
+					"Text": "9",
+					"Keyword": [
+						"9"
+					]
+				}
+			]
+		},
+		{
+			"Theme": "The types of keys we can use",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "The types of keys we can use",
+					"Keyword": [
+						"The types of keys we can use"
+					]
+				},
+				{
+					"Text": "10",
+					"Keyword": []
+				},
+				{
+					"Text": "• There are several local keys and the global key• Local keys:• ValueKey• ObjectKey• UniqueKey• PageStorageKey• Global key: GlobalKey",
+					"Keyword": [
+						"local keys",
+						"global key"
+					]
+				}
+			]
+		},
+		{
+			"Theme": "Value Key",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Value Key",
+					"Keyword": [
+						"Value Key"
+					]
+				},
+				{
+					"Text": "11",
+					"Keyword": [
+						"11"
+					]
+				},
+				{
+					"Text": "• If you expect some value in the widget to be constant and unique, then you can use ValueKey with this unique value.• For example, you might expect the text of a To-do item to be constant and unique in To-do list app.",
+					"Keyword": []
+				},
+				{
+					"Text": "return TodoItem(",
+					"Keyword": []
+				},
+				{
+					"Text": "key: ValueKey(todo.task),todo: todo,onDismissed: (direction) => _removeTodo(context, todo),",
+					"Keyword": []
+				},
+				{
+					"Text": ");",
+					"Keyword": []
+				}
+			]
+		},
+		{
+			"Theme": "Object Key",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Object Key",
+					"Keyword": [
+						"Object Key"
+					]
+				},
+				{
+					"Text": "12",
+					"Keyword": [
+						"12"
+					]
+				},
+				{
+					"Text": "• If you expect that any of the individual fields might be the same as another entry but the combination is unique, then you can use ObjectKey withthese combination.• For example, in an address book app, any of the individual fields like a first name or birthday might be the same as another entry, but the combination is unique.",
+					"Keyword": []
+				}
+			]
+		},
+		{
+			"Theme": "Unique Key",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Unique Key",
+					"Keyword": [
+						"Unique Key"
+					]
+				},
+				{
+					"Text": "13",
+					"Keyword": [
+						"13"
+					]
+				},
+				{
+					"Text": "• If you have multiple widgets in your collection with the same value or if you want to really ensure each widget is distinct from all others, you can use the UniqueKey.• In the swapping tile example, we didn’t have any other constant data that we’re storing in our tiles, which is the reason we use the unique key.• If you construct a new UniqueKey inside a build method, the widget using that key will get a different, unique key every time you the build method re-executes.• This will eliminate any benefits of using keys.",
+					"Keyword": [
+						"UniqueKey",
+						"build"
+					]
+				}
+			]
+		},
+		{
+			"Theme": "Page Storage Key",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Page Storage Key",
+					"Keyword": [
+						"Page Storage Key"
+					]
+				},
+				{
+					"Text": "14",
+					"Keyword": [
+						"14"
+					]
+				},
+				{
+					"Text": "• PageStorageKeys are specialized keys that store auser’s scroll location so that the app can preserveit for later.",
+					"Keyword": [
+						"PageStorageKey"
+					]
+				}
+			]
+		},
+		{
+			"Theme": "Global Key",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Global Key",
+					"Keyword": [
+						"Global Key"
+					]
+				},
+				{
+					"Text": "15",
+					"Keyword": [
+						"15"
+					]
+				},
+				{
+					"Text": "• GlobalKeys have two uses:",
+					"Keyword": [
+						"GlobalKeys"
+					]
+				},
+				{
+					"Text": "• They allow widgets to change parents anywhere in your app without losing state.• They can be used to access information about anotherwidget in a completely different part of the widget tree.",
+					"Keyword": []
+				},
+				{
+					"Text": "• The Form widget uses the GlobalKey, and this is the only one recommended case using GlobalKey.",
+					"Keyword": [
+						"The Form widget uses the GlobalKey and this is t",
+						"he only one recommended case using GlobalKey"
+					]
+				}
+			]
+		},
+		{
+			"Theme": "Team Project",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": []
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": []
+				},
+				{
+					"Text": "Team Project",
+					"Keyword": [
+						"Team Project"
+					]
+				}
+			]
+		},
+		{
+			"Theme": "Main goal of team project",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Main goal of team project",
+					"Keyword": [
+						"Main goal of team project"
+					]
+				},
+				{
+					"Text": "17",
+					"Keyword": []
+				},
+				{
+					"Text": "• To have an experience of making a complete app with your team members!• It does not need to a creative and unique app that do not exist before.• A specialized app for specific target is enough for novelty in this team project, even if this app is very similar to other apps in terms of functions.",
+					"Keyword": []
+				}
+			]
+		},
+		{
+			"Theme": "What you can",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "What you can",
+					"Keyword": [
+						"What you can"
+					]
+				},
+				{
+					"Text": "18",
+					"Keyword": []
+				},
+				{
+					"Text": "• Referring to other existing apps for designs or functions.• Use some parts of Flutter codes in the documentation or other sources for general use in the Web.• e.g., Blog post explaining some widgets or concepts or Stack exchange",
+					"Keyword": []
+				},
+				{
+					"Text": "• Using other advanced widgets not dealt with in the class. (Recommended!)• Using other frameworks as a database or a server.",
+					"Keyword": []
+				},
+				{
+					"Text": "• The main framework should be Flutter.",
+					"Keyword": []
+				},
+				{
+					"Text": "• Submitting the output app to some other competitions after the mid-term exam.",
+					"Keyword": []
+				}
+			]
+		},
+		{
+			"Theme": "What you cannot",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "What you cannot",
+					"Keyword": [
+						"What you cannot"
+					]
+				},
+				{
+					"Text": "19",
+					"Keyword": []
+				},
+				{
+					"Text": "• Use other Flutter codes for development of some apps.• Use other SDK for mobile development as the main framework.• Use your pre-developed code used in other classes or in other external competitions.",
+					"Keyword": []
+				}
+			]
+		},
+		{
+			"Theme": "Assessment",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Assessment",
+					"Keyword": [
+						"Assessment"
+					]
+				},
+				{
+					"Text": "20",
+					"Keyword": []
+				},
+				{
+					"Text": "• Assessment in this class• Attendance (10%)• Mid-term exam (30%)• Final exam (30%)• Assignment (30%)",
+					"Keyword": []
+				},
+				{
+					"Text": "• Assignments in the class (5%)• Team project (25%)",
+					"Keyword": []
+				},
+				{
+					"Text": "• There are two area for assessment for team project.",
+					"Keyword": []
+				},
+				{
+					"Text": "• Assessment for minimum requirements (10%)• Peer Review (15%)",
+					"Keyword": []
+				},
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Assessment",
+					"Keyword": [
+						"Assessment"
+					]
+				},
+				{
+					"Text": "21",
+					"Keyword": []
+				},
+				{
+					"Text": "• Minimum Requirement (10%)• Submission of proposal (2%)• Presentations (4%)• Meeting the minimum specifications (4%)",
+					"Keyword": []
+				},
+				{
+					"Text": "• Whether the app uses the core widgets dealt with in this class.",
+					"Keyword": []
+				},
+				{
+					"Text": "• Peer Review (15%)",
+					"Keyword": []
+				},
+				{
+					"Text": "• Novelty(3%): Whether this app is new. (to some specific targets)• Completeness(4%): Whether each function works well.• Variety(4%): Whether the app includes various functions related to the main goal.• Convenience(4%): Whether the app is convenient to use. (Documentation may be important.)",
+					"Keyword": []
+				}
+			]
+		},
+		{
+			"Theme": "Proposal Presentation",
+			"Texts": [
+				{
+					"Text": "Fall 2022",
+					"Keyword": [
+						"Fall 2022"
+					]
+				},
+				{
+					"Text": "Mobile Application Development",
+					"Keyword": [
+						"Mobile Application Development"
+					]
+				},
+				{
+					"Text": "Proposal Presentation",
+					"Keyword": [
+						"Proposal Presentation"
+					]
+				},
+				{
+					"Text": "22",
+					"Keyword": []
+				}
+			]
+		}
+	]
+}

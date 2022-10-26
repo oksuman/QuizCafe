@@ -21,7 +21,7 @@ def pick_default_color(chars):
 def pick_default_font(chars):
     font_list = {}
     for char_plumber in chars:
-        if char_plumber['stroking_color'] in font_list:
+        if char_plumber['fontname'] in font_list:
             font_list[char_plumber['fontname']] += 1
         else:
             font_list[char_plumber['fontname']] = 0

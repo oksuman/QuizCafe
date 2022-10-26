@@ -18,7 +18,7 @@ class SelectedStack:
 
     def pop_all(self):
         char2string = ''.join(self.stack)
-        char2string.strip()
+        char2string = char2string.strip()
         self.stack.clear()
         return char2string
         

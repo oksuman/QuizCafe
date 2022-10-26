@@ -1,4 +1,11 @@
-# QuizCafe
-![](https://cdn.gukjenews.com/news/photo/202207/2517619_2517781_5838.jpg)
+# pdf to json
 
-###### 하나! Quiz should be happy now 
+## how to use
+
+
+#### from Pdf2Json import Pdf2Json
+#### file_list = ['pdf/samples/mmm.pdf']
+###### iuput file name string (for dealing bulk input)
+#### hoo = Pdf2Json(file_list)
+#### hoo.pdf_to_json()
+###### call function, pdf_to_json()

@@ -1,0 +1,380 @@
+
+주제 1 : Mobile Application Development
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Joon-Woo Lee
+키워드 : 
+
+문장 : School of Computer Science and EngineeringCollege of SoftwareChung-Ang University
+키워드 : 
+
+문장 : Week 6. Using Keys / Team Project
+키워드 : Week 6 Using Keys  Team Project 
+
+
+주제 2 : How the Flutter uses keys
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : How the Flutter uses keys
+키워드 : How the Flutter uses keys 
+
+문장 : 2
+키워드 : 
+
+문장 : • Assume that we have one parent widget (e.g. Row or ListView) and many children widgets with the same type (e.g. Padding with Container orListTile)• In the subtree of each child widget, there is at least one stateful widget.• Then we have given a change to the children widgets (e.g. swapping, inserting, or removing)
+키워드 : 
+
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : How the Flutter uses keys
+키워드 : How the Flutter uses keys 
+
+문장 : 3
+키워드 : 3 
+
+문장 : • Then, the key of some Elements doesn’t match the key of the corresponding widget.• This causes Flutter to deactivate those elements and remove the references to the Tile Elements in the Element Tree, starting with the first one that doesn’t match.• Flutter looks through to non-matched children of the Row for an element with the correct corresponding key.• It finds a match and updates its reference to the corresponding widget.
+키워드 : Row 
+
+문장 : Fall 2022
+키워드 : 
+
+문장 : Mobile Application Development
+키워드 : 
+
+문장 : How the Flutter uses keys
+키워드 : 
+
+문장 : 4
+키워드 : 4 
+
+
+주제 3 : Where we put the keys (Local keys)
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Where we put the keys (Local keys)
+키워드 : Where we put the keys Local keys 
+
+문장 : 5
+키워드 : 5 
+
+문장 : • If you need to add keys to your app, you should add them at the top ofthe widget subtree with the state you need to preserve.• A common mistake: Putting a key on the first stateful widget.• Flutter’s element-to-widget-matching algorithm looks at one level in the tree at a time.• When matching up widget to elements, Flutter only looks for key matches within a particular level in the tree.
+키워드 : 
+
+
+주제 4 : Where we put the keys
+문장 : Fall 2022
+키워드 : 
+
+문장 : Mobile Application Development
+키워드 : 
+
+문장 : Where we put the keys
+키워드 : 
+
+문장 : 6
+키워드 : 6 
+
+문장 : Fall 2022
+키워드 : 
+
+문장 : Mobile Application Development
+키워드 : 
+
+문장 : Where we put the keys
+키워드 : 
+
+문장 : 7
+키워드 : 7 
+
+문장 : Fall 2022
+키워드 : 
+
+문장 : Mobile Application Development
+키워드 : 
+
+문장 : Where we put the keys
+키워드 : 
+
+문장 : 8
+키워드 : 8 
+
+문장 : Fall 2022
+키워드 : 
+
+문장 : Mobile Application Development
+키워드 : 
+
+문장 : Where we put the keys
+키워드 : 
+
+문장 : 9
+키워드 : 9 
+
+
+주제 5 : The types of keys we can use
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : The types of keys we can use
+키워드 : The types of keys we can use 
+
+문장 : 10
+키워드 : 
+
+문장 : • There are several local keys and the global key• Local keys:• ValueKey• ObjectKey• UniqueKey• PageStorageKey• Global key: GlobalKey
+키워드 : local keys global key 
+
+
+주제 6 : Value Key
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Value Key
+키워드 : Value Key 
+
+문장 : 11
+키워드 : 11 
+
+문장 : • If you expect some value in the widget to be constant and unique, then you can use ValueKey with this unique value.• For example, you might expect the text of a To-do item to be constant and unique in To-do list app.
+키워드 : 
+
+문장 : return TodoItem(
+키워드 : 
+
+문장 : key: ValueKey(todo.task),todo: todo,onDismissed: (direction) => _removeTodo(context, todo),
+키워드 : 
+
+문장 : );
+키워드 : 
+
+
+주제 7 : Object Key
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Object Key
+키워드 : Object Key 
+
+문장 : 12
+키워드 : 12 
+
+문장 : • If you expect that any of the individual fields might be the same as another entry but the combination is unique, then you can use ObjectKey withthese combination.• For example, in an address book app, any of the individual fields like a first name or birthday might be the same as another entry, but the combination is unique.
+키워드 : 
+
+
+주제 8 : Unique Key
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Unique Key
+키워드 : Unique Key 
+
+문장 : 13
+키워드 : 13 
+
+문장 : • If you have multiple widgets in your collection with the same value or if you want to really ensure each widget is distinct from all others, you can use the UniqueKey.• In the swapping tile example, we didn’t have any other constant data that we’re storing in our tiles, which is the reason we use the unique key.• If you construct a new UniqueKey inside a build method, the widget using that key will get a different, unique key every time you the build method re-executes.• This will eliminate any benefits of using keys.
+키워드 : UniqueKey build 
+
+
+주제 9 : Page Storage Key
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Page Storage Key
+키워드 : Page Storage Key 
+
+문장 : 14
+키워드 : 14 
+
+문장 : • PageStorageKeys are specialized keys that store auser’s scroll location so that the app can preserveit for later.
+키워드 : PageStorageKey 
+
+
+주제 10 : Global Key
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Global Key
+키워드 : Global Key 
+
+문장 : 15
+키워드 : 15 
+
+문장 : • GlobalKeys have two uses:
+키워드 : GlobalKeys 
+
+문장 : • They allow widgets to change parents anywhere in your app without losing state.• They can be used to access information about anotherwidget in a completely different part of the widget tree.
+키워드 : 
+
+문장 : • The Form widget uses the GlobalKey, and this is the only one recommended case using GlobalKey.
+키워드 : he only one recommended case using GlobalKey The Form widget uses the GlobalKey and this is t 
+
+
+주제 11 : Team Project
+문장 : Fall 2022
+키워드 : 
+
+문장 : Mobile Application Development
+키워드 : 
+
+문장 : Team Project
+키워드 : Team Project 
+
+
+주제 12 : Main goal of team project
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Main goal of team project
+키워드 : Main goal of team project 
+
+문장 : 17
+키워드 : 
+
+문장 : • To have an experience of making a complete app with your team members!• It does not need to a creative and unique app that do not exist before.• A specialized app for specific target is enough for novelty in this team project, even if this app is very similar to other apps in terms of functions.
+키워드 : 
+
+
+주제 13 : What you can
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : What you can
+키워드 : What you can 
+
+문장 : 18
+키워드 : 
+
+문장 : • Referring to other existing apps for designs or functions.• Use some parts of Flutter codes in the documentation or other sources for general use in the Web.• e.g., Blog post explaining some widgets or concepts or Stack exchange
+키워드 : 
+
+문장 : • Using other advanced widgets not dealt with in the class. (Recommended!)• Using other frameworks as a database or a server.
+키워드 : 
+
+문장 : • The main framework should be Flutter.
+키워드 : 
+
+문장 : • Submitting the output app to some other competitions after the mid-term exam.
+키워드 : 
+
+
+주제 14 : What you cannot
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : What you cannot
+키워드 : What you cannot 
+
+문장 : 19
+키워드 : 
+
+문장 : • Use other Flutter codes for development of some apps.• Use other SDK for mobile development as the main framework.• Use your pre-developed code used in other classes or in other external competitions.
+키워드 : 
+
+
+주제 15 : Assessment
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Assessment
+키워드 : Assessment 
+
+문장 : 20
+키워드 : 
+
+문장 : • Assessment in this class• Attendance (10%)• Mid-term exam (30%)• Final exam (30%)• Assignment (30%)
+키워드 : 
+
+문장 : • Assignments in the class (5%)• Team project (25%)
+키워드 : 
+
+문장 : • There are two area for assessment for team project.
+키워드 : 
+
+문장 : • Assessment for minimum requirements (10%)• Peer Review (15%)
+키워드 : 
+
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Assessment
+키워드 : Assessment 
+
+문장 : 21
+키워드 : 
+
+문장 : • Minimum Requirement (10%)• Submission of proposal (2%)• Presentations (4%)• Meeting the minimum specifications (4%)
+키워드 : 
+
+문장 : • Whether the app uses the core widgets dealt with in this class.
+키워드 : 
+
+문장 : • Peer Review (15%)
+키워드 : 
+
+문장 : • Novelty(3%): Whether this app is new. (to some specific targets)• Completeness(4%): Whether each function works well.• Variety(4%): Whether the app includes various functions related to the main goal.• Convenience(4%): Whether the app is convenient to use. (Documentation may be important.)
+키워드 : 
+
+
+주제 16 : Proposal Presentation
+문장 : Fall 2022
+키워드 : Fall 2022 
+
+문장 : Mobile Application Development
+키워드 : Mobile Application Development 
+
+문장 : Proposal Presentation
+키워드 : Proposal Presentation 
+
+문장 : 22
+키워드 : 
+
