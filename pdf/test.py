@@ -10,13 +10,21 @@ from Default import *
 import json
 
 
-with open('pdf/samples/mmm.pdf', 'rb') as input_file:
+with open('samples/ssogong.pdf', 'rb') as input_file:
     with pdfplumber.PDF(input_file) as pdf_file:
         for page_miner, page_plumber in zip(extract_pages(input_file), pdf_file.pages):
         
             for element in page_miner:
-                if isinstance(element, LTTextBox):
-                    print("new box")
-                    for textline in element:
-                        if isinstance(textline, LTTextLine):
-                            print(textline.get_text())
+                if page_plumber.page_number == 8:
+                    count = 0
+                    for char in page_plumber.chars:
+                        if 'Bold' in char['fontname']:
+                            print(char['text'])
+                            print(char['fontname'])
+                            print(char['non_stroking_color'])
+                            count += 1
+                    
+                    # if isinstance(element, LTTextBox):
+                    #     for textline in element:
+                    #         if isinstance(textline, LTTextLine):
+                    #             print(textline.get_text())

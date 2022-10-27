@@ -12,30 +12,20 @@ import json
 
 class Pdf2Json:
     def __init__(self, _FileSet : list):
-        self.MAX_COUNT : final = 100                # max pending counting
+        self.MAX_COUNT : final = 300                # max pending counting
         self.FileSet = _FileSet
         self.TextList = []                          # list of TextLine
         self.combined_TextList = []                 # list of TextLine
         self.ThemeList = []                         # list of Theme
-    
+        
     def pdf_to_json(self):
-
-        if len(self.FileSet) == 1:
-            self.read_pdf(self.FileSet[0])
-            self.combine()
-            self.divide_by_theme(self.combined_TextList)
-            self.wirte_json(tag = 'output')
-
-            self.TextList.clear()
-            self.combined_TextList.clear()
-            self.ThemeList.clear()
 
         output_numbering = 1
         for file in self.FileSet:
             self.read_pdf(file)
             self.combine()
             self.divide_by_theme(self.combined_TextList)
-            self.wirte_json("output" + str(output_numbering) + '.json')
+            self.wirte_json("output" + str(output_numbering))
 
             self.TextList.clear()
             self.combined_TextList.clear()
@@ -98,6 +88,7 @@ class Pdf2Json:
                                     
                 if pending_list:
                     pending_list.clear()
+                    print(page_plumber.page_number)
                     print('pdf extracion is not perfect !!')
          
 
@@ -157,13 +148,41 @@ class Pdf2Json:
                 else:
                     pass
                             
+                # FONT
+                # start keyword searching 
+                if 'Bold' in chars[index]['fontname'] and FontKeyword == False:
+                    FontKeyword = True
+                    FontDiffStack.push(char_miner)
+                # continue keyword searching
+                elif 'Bold' in chars[index]['fontname'] and FontKeyword == True:
+                    FontDiffStack.push(char_miner)
+                # stop keyword searching
+                elif 'Bold' not in chars[index]['fontname'] and FontKeyword == True:
+                    FontKeyword = False
+                    keyword_set.add(FontDiffStack.pop_all())
+                else:
+                    pass
+                        
+                            
                 if index < len(chars) -1:
                     index += 1
 
-            
-            # 글자가 달라. 개행문자 처리. ' '는 계속 탐색하고 '\n'는 멈추자
             else:
-                if ColorKeyword:
+                if ColorKeyword and FontKeyword:
+                    if char_miner == '\n':
+                        current_color = default_color
+                        ColorKeyword = False
+                        keyword_set.add(ColorDiffStack.pop_all())
+                        
+                        FontKeyword = False
+                        FontDiffStack.append(' ')
+                    elif char_miner == ' ':
+                        ColorDiffStack.push(' ')
+                        FontDiffStack.push(' ')
+                    else:
+                        raise Exception('mismatching detected!!')
+                
+                elif ColorKeyword:
                     if char_miner == '\n':
                         current_color = default_color
                         ColorKeyword = False
@@ -171,6 +190,15 @@ class Pdf2Json:
                         
                     elif char_miner == ' ':
                         ColorDiffStack.push(' ')
+                    else:
+                        raise Exception('mismatching detected!!')
+                    
+                elif FontKeyword:
+                    if char_miner == '\n':
+                        FontKeyword = False
+                        keyword_set.add(FontDiffStack.pop_all())  
+                    elif char_miner == ' ':
+                        FontDiffStack.append(' ')
                     else:
                         raise Exception('mismatching detected!!')
             
