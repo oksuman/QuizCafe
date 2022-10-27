@@ -175,7 +175,7 @@ class Pdf2Json:
                         keyword_set.add(ColorDiffStack.pop_all())
                         
                         FontKeyword = False
-                        FontDiffStack.append(' ')
+                        FontDiffStack.push(' ')
                     elif char_miner == ' ':
                         ColorDiffStack.push(' ')
                         FontDiffStack.push(' ')
@@ -198,7 +198,7 @@ class Pdf2Json:
                         FontKeyword = False
                         keyword_set.add(FontDiffStack.pop_all())  
                     elif char_miner == ' ':
-                        FontDiffStack.append(' ')
+                        FontDiffStack.push(' ')
                     else:
                         raise Exception('mismatching detected!!')
             
