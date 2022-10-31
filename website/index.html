@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="pdfupload.js"></script>
+<style>
+    .fileBox{padding: 20px;}
+    .fileBox input, textarea{width: 100%;}
+    .fileBox textarea{resize:none;}
+    .fileBox .fileDrop{display: inline-block;width: 700px;height: 75px;border: 1px solid #000;overflow: auto;}
+    .fileDrop .fileList .fileName{padding-left: 20px;}
+    .fileDrop .fileList .fileSize{padding-right: 20px; float:right;}
+</style>
+<body>
+    <div class="fileBox">
+        <form id="fileForm" name="fileForm" enctype="multipart/form-data" method="post">
+            <h1>Quiz Cafe</h1>
+            <div id="fileDrop" class="fileDrop"></div>
+            <div class="buttonBox">
+                <button type="button" id="upload">업로드</button>
+                <button type="button" onClick="location.href='index2.html'">문제 풀이 시작</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
