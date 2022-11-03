@@ -1,4 +1,2 @@
-# QuizCafe
-![](https://cdn.gukjenews.com/news/photo/202207/2517619_2517781_5838.jpg)
-
-###### 하나! Quiz should be happy now 
+# Quiz Cafe
+퀴즈 자동 생성 서비스
