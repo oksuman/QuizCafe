@@ -6,7 +6,12 @@ def pick_default_stroking_color(chars):
         else:
             stroking_color_list[char_plumber['stroking_color']] = 0
     
+<<<<<<< HEAD
     return max(stroking_color_list,key=stroking_color_list.get)
+=======
+    return max(stroking_color_list, key=stroking_color_list.get)
+
+>>>>>>> backend
 
 def pick_default_color(chars):
     color_list = {}
@@ -16,7 +21,12 @@ def pick_default_color(chars):
         else:
             color_list[str(char_plumber['non_stroking_color'])] = 0
  
+<<<<<<< HEAD
     return max(color_list,key=color_list.get)
+=======
+    return max(color_list, key=color_list.get)
+
+>>>>>>> backend
 
 def pick_default_font(chars):
     font_list = {}
@@ -26,4 +36,8 @@ def pick_default_font(chars):
         else:
             font_list[char_plumber['fontname']] = 0
     
+<<<<<<< HEAD
     return max(font_list,key=font_list.get)
+=======
+    return max(font_list, key=font_list.get)
+>>>>>>> backend

@@ -1,12 +1,16 @@
 import string
 from typing import final
 import pdfplumber
+<<<<<<< HEAD
 import pdfminer
+=======
+>>>>>>> backend
 from pdfminer.high_level import extract_pages
 from pdfminer.layout import *
 from SelectedStack import SelectedStack
 from DataType import *
 from Default import *
+<<<<<<< HEAD
 import json
 
 
@@ -14,24 +18,42 @@ class Pdf2Json:
     def __init__(self, _FileSet : list):
         self.MAX_COUNT : final = 300                # max pending counting
         self.FileSet = _FileSet
+=======
+from io import BytesIO
+
+
+class Pdf2Json:
+    def __init__(self, _FileSet: list):
+        self.MAX_COUNT: final = 300                # max pending counting
+        self.FileSet = _FileSet
+        self.data = {}
+>>>>>>> backend
         self.TextList = []                          # list of TextLine
         self.combined_TextList = []                 # list of TextLine
         self.ThemeList = []                         # list of Theme
         
     def pdf_to_json(self):
+<<<<<<< HEAD
 
+=======
+>>>>>>> backend
         output_numbering = 1
         for file in self.FileSet:
             self.read_pdf(file)
             self.combine()
             self.divide_by_theme(self.combined_TextList)
+<<<<<<< HEAD
             self.wirte_json("output" + str(output_numbering))
+=======
+            self.write_json("output" + str(output_numbering))
+>>>>>>> backend
 
             self.TextList.clear()
             self.combined_TextList.clear()
             self.ThemeList.clear()
             output_numbering += 1
 
+<<<<<<< HEAD
     def read_pdf(self, FileString : string):
         with open(FileString, 'rb') as input_file:
             with pdfplumber.PDF(input_file) as pdf_file:
@@ -85,10 +107,66 @@ class Pdf2Json:
 
                         if pending_count > self.MAX_COUNT:
                             break
+=======
+    def read_pdf(self, FileString: string):
+        input_file = BytesIO(FileString)
+        with pdfplumber.PDF(input_file) as pdf_file:
+            for page_miner, page_plumber in zip(extract_pages(input_file), pdf_file.pages):
+
+                chars_plumber = page_plumber.chars
+                index = 0                       # index for indicating character page_plumber
+                page_default_color = pick_default_color(chars_plumber)
+                page_number = page_plumber.page_number
+
+                textlines = []
+                # list of pending_textline
+                # for unmatched textline between pdfminer and pdfplumber
+                pending_list = []
+                pending_count = 0
+
+                box_num = 0
+                for element in page_miner:
+                    if isinstance(element, LTTextBox):
+                        for textline in element:
+                            if isinstance(textline, LTTextLine):
+                                textlines.append({'text' : textline.get_text(), 'box number' : box_num})
+                        box_num += 1
+
+                while textlines or pending_list:
+                    if textlines:
+                        textline = textlines.pop(0)
+                    else:
+                        textline = pending_list.pop(0)
+                        pending_count += 1
+
+                    if textline['text'][0] == chars_plumber[index]['text']:
+                        try:
+                            index = self.detect_diff(chars_plumber, textline, index, page_number, page_default_color)
+                        except:
+                            pending_list.append(textline)
+                            continue
+
+                    else:
+                        pending_list.append(textline)
+                        for pending_index in range(len(pending_list)):
+                            if pending_list[pending_index]['text'][0] == chars_plumber[index]['text']:
+                                pending_textline = pending_list.pop(pending_index)
+                                try:
+                                    index = self.detect_diff(chars_plumber, pending_textline, index, page_number, page_default_color)
+                                except:
+                                    pending_list.append(pending_textline)
+                                break
+                            else:
+                                continue
+
+                    if pending_count > self.MAX_COUNT:
+                        break
+>>>>>>> backend
                                     
                 if pending_list:
                     pending_list.clear()
                     print(page_plumber.page_number)
+<<<<<<< HEAD
                     print('pdf extracion is not perfect !!')
          
 
@@ -99,6 +177,16 @@ class Pdf2Json:
         for theme in self.ThemeList:
             theme_dic = {'Theme' : '', 'Texts' : []}
             textline_dic = {'Text' : '', 'Keyword' : []}
+=======
+                    print('pdf extraction is not perfect !!')
+
+    def write_json(self, tag: string):
+        self.data = {tag: []}
+
+        for theme in self.ThemeList:
+            theme_dic = {'Theme': '', 'Texts': []}
+            textline_dic = {'Text': '', 'Keyword': []}
+>>>>>>> backend
             
             theme_dic['Theme'] = theme.quiver
             for arrow in theme.arrows.array:
@@ -106,6 +194,7 @@ class Pdf2Json:
                 textline_dic['Keyword'].extend(arrow.keyword_set)
                 theme_dic['Texts'].append(textline_dic)
                 
+<<<<<<< HEAD
                 textline_dic = {'Text' : '', 'Keyword' : []}
                 
 
@@ -117,6 +206,13 @@ class Pdf2Json:
 
     def detect_diff(self, chars, textline, index, page_num, default_color):
     
+=======
+                textline_dic = {'Text': '', 'Keyword': []}
+
+            self.data[tag].append(theme_dic)
+
+    def detect_diff(self, chars, textline, index, page_num, default_color):
+>>>>>>> backend
         # keyword checking stacks
         FontDiffStack = SelectedStack()
         ColorDiffStack = SelectedStack()
@@ -162,7 +258,10 @@ class Pdf2Json:
                     keyword_set.add(FontDiffStack.pop_all())
                 else:
                     pass
+<<<<<<< HEAD
                         
+=======
+>>>>>>> backend
                             
                 if index < len(chars) -1:
                     index += 1
@@ -214,7 +313,10 @@ class Pdf2Json:
         return index 
 
     def combine(self):
+<<<<<<< HEAD
     
+=======
+>>>>>>> backend
         combined_textline = self.TextList.pop(0)
         current_page = combined_textline.page_num
         current_box = combined_textline.box_num
@@ -238,7 +340,10 @@ class Pdf2Json:
                 combined_text.clear()
                 combined_text.append(combined_textline.text.strip())
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> backend
     def divide_by_theme(self, TextList):
         next_page_num = 1
         while TextList:
@@ -253,7 +358,11 @@ class Pdf2Json:
                     max_font_size = textline.size         
                     theme.quiver = textline.text
                 
+<<<<<<< HEAD
                 theme.arrows.add(arrow(textline.text, textline.keyword_set))
+=======
+                theme.arrows.add(Arrow(textline.text, textline.keyword_set))
+>>>>>>> backend
                 if TextList: 
                     next_page_num = TextList[0].page_num
                 else:
@@ -273,5 +382,8 @@ class Pdf2Json:
 
             else:
                 self.ThemeList.append(theme)   
+<<<<<<< HEAD
 
         
+=======
+>>>>>>> backend

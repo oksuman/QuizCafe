@@ -21,7 +21,10 @@ class SelectedStack:
         char2string = char2string.strip()
         self.stack.clear()
         return char2string
+<<<<<<< HEAD
         
         
     
         
+=======
+>>>>>>> backend
