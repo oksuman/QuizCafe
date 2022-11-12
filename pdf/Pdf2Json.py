@@ -228,7 +228,7 @@ class Pdf2Json:
                 combined_textline.keyword_set.update(temp.keyword_set)
 
             else:
-                combined_textline.text = "".join(combined_text)
+                combined_textline.text = " ".join(combined_text)
                 self.combined_TextList.append(combined_textline)
 
                 combined_textline = self.TextList.pop(0)
