@@ -11,13 +11,13 @@ from io import BytesIO
 
 class Pdf2Json:
     def __init__(self, _FileSet: list):
-        self.MAX_COUNT: final = 300                # max pending counting
+        self.MAX_COUNT: final = 300  # max pending counting
         self.FileSet = _FileSet
         self.data = {}
-        self.TextList = []                          # list of TextLine
-        self.combined_TextList = []                 # list of TextLine
-        self.ThemeList = []                         # list of Theme
-        
+        self.TextList = []  # list of TextLine
+        self.combined_TextList = []  # list of TextLine
+        self.ThemeList = []  # list of Theme
+
     def pdf_to_json(self):
         output_numbering = 1
         for file in self.FileSet:
@@ -37,7 +37,7 @@ class Pdf2Json:
             for page_miner, page_plumber in zip(extract_pages(input_file), pdf_file.pages):
 
                 chars_plumber = page_plumber.chars
-                index = 0                       # index for indicating character page_plumber
+                index = 0  # index for indicating character page_plumber
                 page_default_color = pick_default_color(chars_plumber)
                 page_number = page_plumber.page_number
 
@@ -52,7 +52,7 @@ class Pdf2Json:
                     if isinstance(element, LTTextBox):
                         for textline in element:
                             if isinstance(textline, LTTextLine):
-                                textlines.append({'text' : textline.get_text(), 'box number' : box_num})
+                                textlines.append({'text': textline.get_text(), 'box number': box_num})
                         box_num += 1
 
                 while textlines or pending_list:
@@ -75,7 +75,8 @@ class Pdf2Json:
                             if pending_list[pending_index]['text'][0] == chars_plumber[index]['text']:
                                 pending_textline = pending_list.pop(pending_index)
                                 try:
-                                    index = self.detect_diff(chars_plumber, pending_textline, index, page_number, page_default_color)
+                                    index = self.detect_diff(chars_plumber, pending_textline, index, page_number,
+                                                             page_default_color)
                                 except:
                                     pending_list.append(pending_textline)
                                 break
@@ -84,7 +85,7 @@ class Pdf2Json:
 
                     if pending_count > self.MAX_COUNT:
                         break
-                                    
+
                 if pending_list:
                     pending_list.clear()
                     print(page_plumber.page_number)
@@ -96,13 +97,13 @@ class Pdf2Json:
         for theme in self.ThemeList:
             theme_dic = {'Theme': '', 'Texts': []}
             textline_dic = {'Text': '', 'Keyword': []}
-            
+
             theme_dic['Theme'] = theme.quiver
             for arrow in theme.arrows.array:
                 textline_dic['Text'] = arrow.text
                 textline_dic['Keyword'].extend(arrow.keyword_set)
                 theme_dic['Texts'].append(textline_dic)
-                
+
                 textline_dic = {'Text': '', 'Keyword': []}
 
             self.data[tag].append(theme_dic)
@@ -206,8 +207,8 @@ class Pdf2Json:
                         TextStack.append(' ')
                     else:
                         raise Exception('mismatching detected!!')
-            
-                else: 
+
+                else:
                     if char_miner == '\n' or char_miner == ' ':
                         TextStack.append(char_miner)
                         continue
@@ -267,31 +268,31 @@ class Pdf2Json:
             current_page_num = TextList[0].page_num
             max_font_size = 0
             arrows = Arrows()
-            theme = Theme("", arrows) 
-            
+            theme = Theme("", arrows)
+
             while current_page_num == next_page_num:
                 textline = TextList.pop(0)
                 if max_font_size < textline.size:
-                    max_font_size = textline.size         
+                    max_font_size = textline.size
                     theme.quiver = textline.text
-                
+
                 theme.arrows.add(Arrow(textline.text, textline.keyword_set))
-                if TextList: 
+                if TextList:
                     next_page_num = TextList[0].page_num
                 else:
                     break
-            
+
             is_present_quiver = False
             if self.ThemeList:
                 for set_theme in self.ThemeList:
                     if set_theme.quiver == theme.quiver:
                         is_present_quiver = True
                         set_theme.arrows.array.extend(theme.arrows.array)
-                        
+
                 if is_present_quiver:
                     pass
                 else:
                     self.ThemeList.append(theme)
 
             else:
-                self.ThemeList.append(theme)   
+                self.ThemeList.append(theme)

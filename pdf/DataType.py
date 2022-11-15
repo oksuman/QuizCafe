@@ -4,17 +4,17 @@ from dataclasses import dataclass
 @dataclass
 class TextLine:
     text: str
-    size: int            
-    location: float       # point where textline starts
-    keyword_set: set      # based on changes of color or size
-    page_num: int        # page number that textline came from
+    size: int
+    location: float  # point where textline starts
+    keyword_set: set  # based on changes of color or size
+    page_num: int  # page number that textline came from
     box_num: int
 
 
 @dataclass
 class Theme:
     quiver: str
-    arrows: list          # arrows : list of arrow
+    arrows: list  # arrows : list of arrow
 
 
 @dataclass
@@ -26,7 +26,7 @@ class Arrow:
 class Arrows:
     def __init__(self):
         self.array = []
-        
+
     def add(self, input_arrow):
         is_in_array = False
         if self.array:
@@ -39,6 +39,6 @@ class Arrows:
             if is_in_array:
                 pass
             else:
-                self.array.append(input_arrow)   
+                self.array.append(input_arrow)
         else:
             self.array.append(input_arrow)

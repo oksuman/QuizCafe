@@ -30,7 +30,7 @@ def get_quizzes(files):
         for text in d["Texts"]:
             keywords = text["Keyword"]
             if len(keywords) > 0:
-                if text["Text"] != keywords[0] and topic != text["Text"]:
+                if "" not in keywords and text["Text"] != keywords[0] and topic != text["Text"]:
                     quizzes.append(Quiz(topic=topic, sentence=text["Text"], answers=keywords))
 
     return QuizListResponse(
