@@ -114,107 +114,206 @@ class Pdf2Json:
         with open(tag + '.json', 'w', encoding="utf-8") as output:
             json.dump(data, output, ensure_ascii=False, indent='\t')
 
-
     def detect_diff(self, chars, textline, index, page_num, default_color):
-    
         # keyword checking stacks
-        FontDiffStack = SelectedStack()
         ColorDiffStack = SelectedStack()
+        BoldDiffStack = SelectedStack()
+        # text stack
+        TextStack = []
         # keyword checking status
-        FontKeyword = False
         ColorKeyword = False
-        
+        BoldKeyword = False
+
         current_color = default_color
 
-        temp = TextLine(textline['text'], chars[index]['size'], chars[index]['x0'], [], page_num, textline['box number'])
-        keyword_set = set() 
+        size = chars[index]['size']
+        location = chars[index]['x0']
+        keyword_set = set()
+        box_num = textline['box number'] 
 
         for char_miner in textline['text']:
             if char_miner == chars[index]['text']:
-                # COLOR 
+                # COLOR
                 # start keyword searching 
-                if current_color != str(chars[index]['non_stroking_color']) and ColorKeyword == False:
+                if current_color != str(chars[index]['non_stroking_color']) and not ColorKeyword and not BoldKeyword:
                     current_color = str(chars[index]['non_stroking_color'])
                     ColorKeyword = True
                     ColorDiffStack.push(char_miner)
+                    TextStack.extend(['<','k','s','>'])
                 # continue keyword searching
-                elif current_color == str(chars[index]['non_stroking_color']) and ColorKeyword == True:
+                elif current_color == str(chars[index]['non_stroking_color']) and ColorKeyword:
                     ColorDiffStack.push(char_miner)
                 # stop keyword searching
-                elif current_color != str(chars[index]['non_stroking_color']) and ColorKeyword == True:
+                elif current_color != str(chars[index]['non_stroking_color']) and ColorKeyword:
                     current_color = str(chars[index]['non_stroking_color'])
                     ColorKeyword = False
                     keyword_set.add(ColorDiffStack.pop_all())
+                    TextStack.extend(['<','k','e','>'])
                 else:
                     pass
-                            
+
                 # FONT
                 # start keyword searching 
-                if 'Bold' in chars[index]['fontname'] and FontKeyword == False:
-                    FontKeyword = True
-                    FontDiffStack.push(char_miner)
+                if 'Bold' in chars[index]['fontname'] and not BoldKeyword and not ColorKeyword:
+                    BoldKeyword = True
+                    BoldDiffStack.push(char_miner)
+                    TextStack.extend(['<','k','s','>'])
                 # continue keyword searching
-                elif 'Bold' in chars[index]['fontname'] and FontKeyword == True:
-                    FontDiffStack.push(char_miner)
+                elif 'Bold' in chars[index]['fontname'] and BoldKeyword:
+                    BoldDiffStack.push(char_miner)
                 # stop keyword searching
-                elif 'Bold' not in chars[index]['fontname'] and FontKeyword == True:
-                    FontKeyword = False
-                    keyword_set.add(FontDiffStack.pop_all())
+                elif 'Bold' not in chars[index]['fontname'] and BoldKeyword:
+                    BoldKeyword = False
+                    keyword_set.add(BoldDiffStack.pop_all())
+                    TextStack.extend(['<','k','e','>'])
                 else:
                     pass
-                        
-                            
-                if index < len(chars) -1:
+
+                TextStack.append(char_miner)
+                if index < len(chars)-1:
                     index += 1
 
             else:
-                if ColorKeyword and FontKeyword:
+                if ColorKeyword:
                     if char_miner == '\n':
                         current_color = default_color
                         ColorKeyword = False
                         keyword_set.add(ColorDiffStack.pop_all())
-                        
-                        FontKeyword = False
-                        FontDiffStack.push(' ')
-                    elif char_miner == ' ':
-                        ColorDiffStack.push(' ')
-                        FontDiffStack.push(' ')
-                    else:
-                        raise Exception('mismatching detected!!')
-                
-                elif ColorKeyword:
-                    if char_miner == '\n':
-                        current_color = default_color
-                        ColorKeyword = False
-                        keyword_set.add(ColorDiffStack.pop_all())
+                        TextStack.extend(['<','k','e','>'])
                         
                     elif char_miner == ' ':
                         ColorDiffStack.push(' ')
+                        TextStack.append(' ')
                     else:
                         raise Exception('mismatching detected!!')
                     
-                elif FontKeyword:
+                elif BoldKeyword:
                     if char_miner == '\n':
-                        FontKeyword = False
-                        keyword_set.add(FontDiffStack.pop_all())  
+                        BoldKeyword = False
+                        keyword_set.add(BoldDiffStack.pop_all())
+                        TextStack.extend(['<','k','e','>'])
+                
                     elif char_miner == ' ':
-                        FontDiffStack.push(' ')
+                        BoldDiffStack.push(' ')
+                        TextStack.append(' ')
                     else:
                         raise Exception('mismatching detected!!')
             
                 else: 
                     if char_miner == '\n' or char_miner == ' ':
+                        TextStack.append(char_miner)
                         continue
                     else:
                         raise Exception('mismatching detected!!')
-                
-        temp.keyword_set = keyword_set
+
+        
+        text = ''.join(TextStack)
+        temp = TextLine(text,size,location,keyword_set,page_num,box_num)
         self.TextList.append(temp)
+        return index
+        
+    # def detect_diff(self, chars, textline, index, page_num, default_color):
     
-        return index 
+    #     # keyword checking stacks
+    #     FontDiffStack = SelectedStack()
+    #     ColorDiffStack = SelectedStack()
+    #     # keyword checking status
+    #     FontKeyword = False
+    #     ColorKeyword = False
+        
+    #     current_color = default_color
+
+    #     temp = TextLine(textline['text'], chars[index]['size'], chars[index]['x0'], [], page_num, textline['box number'])
+    #     keyword_set = set() 
+
+    #     for char_miner in textline['text']:
+    #         if char_miner == chars[index]['text']:
+    #             # COLOR 
+    #             # start keyword searching 
+    #             if current_color != str(chars[index]['non_stroking_color']) and ColorKeyword == False:
+    #                 current_color = str(chars[index]['non_stroking_color'])
+    #                 ColorKeyword = True
+    #                 ColorDiffStack.push(char_miner)
+    #             # continue keyword searching
+    #             elif current_color == str(chars[index]['non_stroking_color']) and ColorKeyword == True:
+    #                 ColorDiffStack.push(char_miner)
+    #             # stop keyword searching
+    #             elif current_color != str(chars[index]['non_stroking_color']) and ColorKeyword == True:
+    #                 current_color = str(chars[index]['non_stroking_color'])
+    #                 ColorKeyword = False
+    #                 keyword_set.add(ColorDiffStack.pop_all())
+    #             else:
+    #                 pass
+                            
+    #             # FONT
+    #             # start keyword searching 
+    #             if 'Bold' in chars[index]['fontname'] and FontKeyword == False:
+    #                 FontKeyword = True
+    #                 FontDiffStack.push(char_miner)
+    #             # continue keyword searching
+    #             elif 'Bold' in chars[index]['fontname'] and FontKeyword == True:
+    #                 FontDiffStack.push(char_miner)
+    #             # stop keyword searching
+    #             elif 'Bold' not in chars[index]['fontname'] and FontKeyword == True:
+    #                 FontKeyword = False
+    #                 keyword_set.add(FontDiffStack.pop_all())
+    #             else:
+    #                 pass
+                        
+                            
+    #             if index < len(chars) -1:
+    #                 index += 1
+
+    #         else:
+    #             if ColorKeyword and FontKeyword:
+    #                 if char_miner == '\n':
+    #                     current_color = default_color
+    #                     ColorKeyword = False
+    #                     keyword_set.add(ColorDiffStack.pop_all())
+                        
+    #                     FontKeyword = False
+    #                     FontDiffStack.push(' ')
+    #                 elif char_miner == ' ':
+    #                     ColorDiffStack.push(' ')
+    #                     FontDiffStack.push(' ')
+    #                 else:
+    #                     raise Exception('mismatching detected!!')
+                
+    #             elif ColorKeyword:
+    #                 if char_miner == '\n':
+    #                     current_color = default_color
+    #                     ColorKeyword = False
+    #                     keyword_set.add(ColorDiffStack.pop_all())
+                        
+    #                 elif char_miner == ' ':
+    #                     ColorDiffStack.push(' ')
+    #                 else:
+    #                     raise Exception('mismatching detected!!')
+                    
+    #             elif FontKeyword:
+    #                 if char_miner == '\n':
+    #                     FontKeyword = False
+    #                     keyword_set.add(FontDiffStack.pop_all())  
+    #                 elif char_miner == ' ':
+    #                     FontDiffStack.push(' ')
+    #                 else:
+    #                     raise Exception('mismatching detected!!')
+            
+    #             else: 
+    #                 if char_miner == '\n' or char_miner == ' ':
+    #                     continue
+    #                 else:
+    #                     raise Exception('mismatching detected!!')
+                
+    #     temp.keyword_set = keyword_set
+    #     self.TextList.append(temp)
+    
+    #     return index 
+
+
+
 
     def combine(self):
-    
         combined_textline = self.TextList.pop(0)
         current_page = combined_textline.page_num
         current_box = combined_textline.box_num
@@ -222,19 +321,31 @@ class Pdf2Json:
         combined_text = []
         combined_text.append(combined_textline.text.strip())
         while self.TextList:
+            # 동일 텍스트 박스에 이어서 넣기
             if self.TextList[0].page_num == current_page and self.TextList[0].box_num == current_box:
                 temp = self.TextList.pop(0)  
-                combined_text.append(temp.text.strip())
+                temp.text = temp.text.strip()
+                if 48 <= ord(temp.text[0]) <= 57:
+                    temp.text = ' ' + temp.text  
+                elif 65 <= ord(temp.text[0]) <= 90:
+                    temp.text = ' ' + temp.text  
+                elif 97 <= ord(temp.text[0]) <= 122:
+                    temp.text = ' ' + temp.text  
+                elif 44032 <= ord(temp.text[0]) <= 55215:
+                    temp.text = ' ' + temp.text  
+                else:
+                    temp.text = '\n' + temp.text
+                
+                combined_text.append(temp.text)
                 combined_textline.keyword_set.update(temp.keyword_set)
-
+            # 다른 텍스트 박스 첫 문장 넣기 
             else:
-                combined_textline.text = " ".join(combined_text)
+                combined_textline.text = "".join(combined_text)
                 self.combined_TextList.append(combined_textline)
 
                 combined_textline = self.TextList.pop(0)
                 current_page = combined_textline.page_num
-                current_box = combined_textline.box_num
-                
+                current_box = combined_textline.box_num           
                 combined_text.clear()
                 combined_text.append(combined_textline.text.strip())
 
