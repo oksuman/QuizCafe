@@ -113,19 +113,15 @@ class Pdf2Json:
         # keyword checking stacks
         ColorDiffStack = SelectedStack()
         BoldDiffStack = SelectedStack()
-        # text stack
-        TextStack = []
         # keyword checking status
         ColorKeyword = False
         BoldKeyword = False
 
         current_color = default_color
-
+        
+        keyword_set = []
         size = chars[index]['size']
         location = chars[index]['x0']
-        keyword_set = set()
-        box_num = textline['box number'] 
-
         for char_miner in textline['text']:
             if char_miner == chars[index]['text']:
                 # COLOR
@@ -134,7 +130,6 @@ class Pdf2Json:
                     current_color = str(chars[index]['non_stroking_color'])
                     ColorKeyword = True
                     ColorDiffStack.push(char_miner)
-                    TextStack.extend(['<','k','s','>'])
                 # continue keyword searching
                 elif current_color == str(chars[index]['non_stroking_color']) and ColorKeyword:
                     ColorDiffStack.push(char_miner)
@@ -142,10 +137,8 @@ class Pdf2Json:
                 elif current_color != str(chars[index]['non_stroking_color']) and ColorKeyword:
                     current_color = str(chars[index]['non_stroking_color'])
                     ColorKeyword = False
-                    temp_keyword = ColorDiffStack.pop_all()
-                    if len(temp_keyword) > 1:
-                        keyword_set.add(temp_keyword)
-                    TextStack.extend(['<','k','e','>'])
+                    keyword_set.append(ColorDiffStack.pop_all())
+                    
                 else:
                     pass
 
@@ -154,27 +147,22 @@ class Pdf2Json:
                 if 'Bold' in chars[index]['fontname'] and not BoldKeyword and not ColorKeyword:
                     BoldKeyword = True
                     BoldDiffStack.push(char_miner)
-                    TextStack.extend(['<','k','s','>'])
                 # continue keyword searching
                 elif 'Bold' in chars[index]['fontname'] and BoldKeyword:
                     BoldDiffStack.push(char_miner)
                 # stop keyword searching
                 elif 'Bold' not in chars[index]['fontname'] and BoldKeyword:
                     BoldKeyword = False
-                    temp_keyword = BoldDiffStack.pop_all()
-                    if len(temp_keyword) > 1:
-                        keyword_set.add(temp_keyword)
-                    TextStack.extend(['<','k','e','>'])
+                    keyword_set.append(BoldDiffStack.pop_all())
+
                     
                     if current_color != str(chars[index]['non_stroking_color']) and not ColorKeyword and not BoldKeyword:
                         current_color = str(chars[index]['non_stroking_color'])
                         ColorKeyword = True
                         ColorDiffStack.push(char_miner)
-                        TextStack.extend(['<','k','s','>'])
                 else:
                     pass
-
-                TextStack.append(char_miner)
+                
                 if index < len(chars)-1:
                     index += 1
 
@@ -183,42 +171,27 @@ class Pdf2Json:
                     if char_miner == '\n':
                         current_color = default_color
                         ColorKeyword = False
-                        temp_keyword = ColorDiffStack.pop_all()
-                        if len(temp_keyword) > 1:
-                            keyword_set.add(temp_keyword)
-                        TextStack.extend(['<','k','e','>'])
-                        
+                        keyword_set.append(ColorDiffStack.pop_all())             
                     elif char_miner == ' ':
                         ColorDiffStack.push(' ')
-                        TextStack.append(' ')
                     else:
                         raise Exception('mismatching detected!!')
                     
                 elif BoldKeyword:
                     if char_miner == '\n':
                         BoldKeyword = False
-                        temp_keyword = BoldDiffStack.pop_all()
-                        if len(temp_keyword) > 1:
-                            keyword_set.add(temp_keyword)
-                        TextStack.extend(['<','k','e','>'])
-                
+                        keyword_set.append(BoldDiffStack.pop_all())
                     elif char_miner == ' ':
                         BoldDiffStack.push(' ')
-                        TextStack.append(' ')
                     else:
                         raise Exception('mismatching detected!!')
-
                 else:
                     if char_miner == '\n' or char_miner == ' ':
-                        TextStack.append(char_miner)
                         continue
                     else:
                         raise Exception('mismatching detected!!')
 
-        
-        text = ''.join(TextStack)
-        temp = TextLine(text,size,location,keyword_set,page_num,box_num)
-        self.TextList.append(temp)
+        self.TextList.append(TextLine(textline['text'],size,location,keyword_set,page_num,textline['box number']))
         return index
 
     def combine(self):
@@ -244,14 +217,11 @@ class Pdf2Json:
                     temp.text = '\n' + temp.text
                 
                 combined_text.append(temp.text)
-                combined_textline.keyword_set.update(temp.keyword_set)
+                combined_textline.keyword_set.extend(temp.keyword_set)
  
             else:
                 temp_text = "".join(combined_text)
-                if '<ke>\n<ks>' in temp_text:
-                    temp_text = temp_text.replace('<ke>\n<ks>', '')
-                    combined_textline.keyword_set.clear()
-                    
+
                 combined_textline.text = temp_text
                 self.combined_TextList.append(combined_textline)
 

@@ -6,7 +6,7 @@ class TextLine:
     text: str
     size: int
     location: float  # point where textline starts
-    keyword_set: set  # based on changes of color or size
+    keyword_set: list  # based on changes of color or size
     page_num: int  # page number that textline came from
     box_num: int
 
@@ -20,7 +20,7 @@ class Theme:
 @dataclass
 class Arrow:
     text: str
-    keyword_set: set
+    keyword_set: list
 
 
 class Arrows:
