@@ -43,18 +43,17 @@ class Pdf2Json:
                     page_number = page_plumber.page_number
                     
                     textlines = []
+                    pending_list = []
                     # list of pending_textline
                     # for unmatched textline between pdfminer and pdfplumber
-                    pending_list = []
                     pending_count = 0 
 
-                    box_num = 0
                     for element in page_miner:
                         if isinstance(element, LTTextBox):
                             for textline in element:
                                 if isinstance(textline, LTTextLine):
-                                    textlines.append({'text' : textline.get_text(), 'box number' : box_num})
-                            box_num += 1
+                                    textlines.append(textline.get_text())
+                        
                                     
                     while textlines or pending_list:
                         if textlines:
@@ -63,7 +62,7 @@ class Pdf2Json:
                             textline = pending_list.pop(0)
                             pending_count += 1
 
-                        if textline['text'][0] == chars_plumber[index]['text']:
+                        if textline[0] == chars_plumber[index]['text']:
                             try:
                                 index = self.detect_diff(chars_plumber, textline, index, page_number, page_default_color)
                             except: 
@@ -73,7 +72,7 @@ class Pdf2Json:
                         else:
                             pending_list.append(textline) 
                             for pending_index in range(len(pending_list)):
-                                if pending_list[pending_index]['text'][0] == chars_plumber[index]['text']:    
+                                if pending_list[pending_index][0] == chars_plumber[index]['text']:    
                                     pending_textline = pending_list.pop(pending_index)
                                     try:
                                         index = self.detect_diff(chars_plumber, pending_textline, index, page_number, page_default_color)
@@ -118,20 +117,21 @@ class Pdf2Json:
         # keyword checking stacks
         ColorDiffStack = SelectedStack()
         BoldDiffStack = SelectedStack()
-        # text stack
-        TextStack = []
         # keyword checking status
         ColorKeyword = False
         BoldKeyword = False
 
         current_color = default_color
+        
+        size = int(chars[index]['size'])
+        location = 0
+        if self.is_special_symbol(chars[index]['text']):
+            location = chars[index+1]['x1']
+        else:
+            location = chars[index]['x1']
+        keyword_set = []
 
-        size = chars[index]['size']
-        location = chars[index]['x0']
-        keyword_set = set()
-        box_num = textline['box number'] 
-
-        for char_miner in textline['text']:
+        for char_miner in textline:
             if char_miner == chars[index]['text']:
                 # COLOR
                 # start keyword searching 
@@ -139,7 +139,6 @@ class Pdf2Json:
                     current_color = str(chars[index]['non_stroking_color'])
                     ColorKeyword = True
                     ColorDiffStack.push(char_miner)
-                    TextStack.extend(['<','k','s','>'])
                 # continue keyword searching
                 elif current_color == str(chars[index]['non_stroking_color']) and ColorKeyword:
                     ColorDiffStack.push(char_miner)
@@ -147,10 +146,8 @@ class Pdf2Json:
                 elif current_color != str(chars[index]['non_stroking_color']) and ColorKeyword:
                     current_color = str(chars[index]['non_stroking_color'])
                     ColorKeyword = False
-                    temp_keyword = ColorDiffStack.pop_all()
-                    if len(temp_keyword) > 1:
-                        keyword_set.add(temp_keyword)
-                    TextStack.extend(['<','k','e','>'])
+                    keyword_set.append(ColorDiffStack.pop_all())
+                    
                 else:
                     pass
 
@@ -159,27 +156,22 @@ class Pdf2Json:
                 if 'Bold' in chars[index]['fontname'] and not BoldKeyword and not ColorKeyword:
                     BoldKeyword = True
                     BoldDiffStack.push(char_miner)
-                    TextStack.extend(['<','k','s','>'])
                 # continue keyword searching
                 elif 'Bold' in chars[index]['fontname'] and BoldKeyword:
                     BoldDiffStack.push(char_miner)
                 # stop keyword searching
                 elif 'Bold' not in chars[index]['fontname'] and BoldKeyword:
                     BoldKeyword = False
-                    temp_keyword = BoldDiffStack.pop_all()
-                    if len(temp_keyword) > 1:
-                        keyword_set.add(temp_keyword)
-                    TextStack.extend(['<','k','e','>'])
+                    keyword_set.append(BoldDiffStack.pop_all())
+
                     
                     if current_color != str(chars[index]['non_stroking_color']) and not ColorKeyword and not BoldKeyword:
                         current_color = str(chars[index]['non_stroking_color'])
                         ColorKeyword = True
                         ColorDiffStack.push(char_miner)
-                        TextStack.extend(['<','k','s','>'])
                 else:
                     pass
-
-                TextStack.append(char_miner)
+                
                 if index < len(chars)-1:
                     index += 1
 
@@ -188,45 +180,45 @@ class Pdf2Json:
                     if char_miner == '\n':
                         current_color = default_color
                         ColorKeyword = False
-                        temp_keyword = ColorDiffStack.pop_all()
-                        if len(temp_keyword) > 1:
-                            keyword_set.add(temp_keyword)
-                        TextStack.extend(['<','k','e','>'])
-                        
+                        keyword_set.append(ColorDiffStack.pop_all())             
                     elif char_miner == ' ':
                         ColorDiffStack.push(' ')
-                        TextStack.append(' ')
                     else:
                         raise Exception('mismatching detected!!')
                     
                 elif BoldKeyword:
                     if char_miner == '\n':
                         BoldKeyword = False
-                        temp_keyword = BoldDiffStack.pop_all()
-                        if len(temp_keyword) > 1:
-                            keyword_set.add(temp_keyword)
-                        TextStack.extend(['<','k','e','>'])
-                
+                        keyword_set.append(BoldDiffStack.pop_all())
                     elif char_miner == ' ':
                         BoldDiffStack.push(' ')
-                        TextStack.append(' ')
                     else:
                         raise Exception('mismatching detected!!')
-            
-                else: 
+                else:
                     if char_miner == '\n' or char_miner == ' ':
-                        TextStack.append(char_miner)
                         continue
                     else:
                         raise Exception('mismatching detected!!')
-
-        
-        text = ''.join(TextStack)
-        temp = TextLine(text,size,location,keyword_set,page_num,box_num)
-        self.TextList.append(temp)
+            
+        self.TextList.append(TextLine(textline,size,location,keyword_set,page_num))
         return index
-    
 
+    def is_special_symbol(self, input):
+        if 48 <= ord(input) <= 57:
+            return False
+        elif 65 <= ord(input) <= 90:
+            return False  
+        elif 97 <= ord(input) <= 122:
+            return False  
+        elif 44032 <= ord(input) <= 55215:
+            return False  
+        elif ord(input) == 32:
+            return False
+        elif ord(input) == 10:
+            return False
+        else:
+            return True
+       
     def combine(self):
         combined_textline = self.TextList.pop(0)
         current_page = combined_textline.page_num
@@ -235,7 +227,6 @@ class Pdf2Json:
         combined_text = []
         combined_text.append(combined_textline.text.strip())
         while self.TextList:
-            # 동일 텍스트 박스에 이어서 넣기
             if self.TextList[0].page_num == current_page and self.TextList[0].box_num == current_box:
                 temp = self.TextList.pop(0)  
                 temp.text = temp.text.strip()
@@ -251,14 +242,11 @@ class Pdf2Json:
                     temp.text = '\n' + temp.text
                 
                 combined_text.append(temp.text)
-                combined_textline.keyword_set.update(temp.keyword_set)
-            # 다른 텍스트 박스 첫 문장 넣기 
+                combined_textline.keyword_set.extend(temp.keyword_set)
+
             else:
                 temp_text = "".join(combined_text)
-                if '<ke>\n<ks>' in temp_text:
-                    temp_text = temp_text.replace('<ke>\n<ks>', '')
-                    combined_textline.keyword_set.clear()
-                    
+
                 combined_textline.text = temp_text
                 self.combined_TextList.append(combined_textline)
 
@@ -267,41 +255,41 @@ class Pdf2Json:
                 current_box = combined_textline.box_num           
                 combined_text.clear()
                 combined_text.append(combined_textline.text.strip())
-        
-    
+                
+
     def divide_by_theme(self, TextList):
         next_page_num = 1
         while TextList:
             current_page_num = TextList[0].page_num
             max_font_size = 0
             arrows = Arrows()
-            theme = Theme("", arrows) 
-            
+            theme = Theme("", arrows)
+
             while current_page_num == next_page_num:
                 textline = TextList.pop(0)
                 if max_font_size < textline.size:
-                    max_font_size = textline.size         
+                    max_font_size = textline.size
                     theme.quiver = textline.text
-                
-                theme.arrows.add(arrow(textline.text, textline.keyword_set))
-                if TextList: 
+                    print(theme.quiver)
+                    print(textline.size)
+
+                theme.arrows.add(Arrow(textline.text, textline.keyword_set))
+                if TextList:
                     next_page_num = TextList[0].page_num
                 else:
                     break
-            
+
             is_present_quiver = False
             if self.ThemeList:
                 for set_theme in self.ThemeList:
                     if set_theme.quiver == theme.quiver:
                         is_present_quiver = True
                         set_theme.arrows.array.extend(theme.arrows.array)
-                        
+
                 if is_present_quiver:
                     pass
                 else:
                     self.ThemeList.append(theme)
 
             else:
-                self.ThemeList.append(theme)   
-
-        
+                self.ThemeList.append(theme)

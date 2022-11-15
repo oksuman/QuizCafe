@@ -5,9 +5,8 @@ class TextLine:
     text: str
     size: int            
     location: float       # point where textline starts
-    keyword_set: set      # based on changes of color or size
+    keyword_set: list     # based on changes of color or size
     page_num : int        # page number that textline came from 
-    box_num : int
 
 
 @dataclass
@@ -16,9 +15,9 @@ class Theme:
     arrows: list          # arrows : list of arrow
     
 @dataclass
-class arrow:
+class Arrow:
     text: str
-    keyword_set: set
+    keyword_set: list
     
 class Arrows:
     def __init__(self):
@@ -39,4 +38,19 @@ class Arrows:
                 self.array.append(input_arrow)   
         else:
             self.array.append(input_arrow)
+    
+@dataclass
+class cell:
+    text : str
+    keywords : list
+    
+@dataclass
+class tuho:
+    label : cell
+    contents : list 
+    
+    # 큰 투호는 contents가 투호들의 list
+    # 작은 투호는 contents가 cell들의 list
+
+ 
     
