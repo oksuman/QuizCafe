@@ -14,7 +14,7 @@ class SelectedStack:
         elif ord(input_char) == 32:
             self.stack.append(input_char)
         else:
-            pass
+            self.stack.append(' ')
 
     def pop_all(self):
         char2string = ''.join(self.stack)
