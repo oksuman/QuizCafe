@@ -147,7 +147,9 @@ class Pdf2Json:
                 elif current_color != str(chars[index]['non_stroking_color']) and ColorKeyword:
                     current_color = str(chars[index]['non_stroking_color'])
                     ColorKeyword = False
-                    keyword_set.add(ColorDiffStack.pop_all())
+                    temp_keyword = ColorDiffStack.pop_all()
+                    if len(temp_keyword) > 1:
+                        keyword_set.add(temp_keyword)
                     TextStack.extend(['<','k','e','>'])
                 else:
                     pass
@@ -164,8 +166,16 @@ class Pdf2Json:
                 # stop keyword searching
                 elif 'Bold' not in chars[index]['fontname'] and BoldKeyword:
                     BoldKeyword = False
-                    keyword_set.add(BoldDiffStack.pop_all())
+                    temp_keyword = BoldDiffStack.pop_all()
+                    if len(temp_keyword) > 1:
+                        keyword_set.add(temp_keyword)
                     TextStack.extend(['<','k','e','>'])
+                    
+                    if current_color != str(chars[index]['non_stroking_color']) and not ColorKeyword and not BoldKeyword:
+                        current_color = str(chars[index]['non_stroking_color'])
+                        ColorKeyword = True
+                        ColorDiffStack.push(char_miner)
+                        TextStack.extend(['<','k','s','>'])
                 else:
                     pass
 
@@ -178,7 +188,9 @@ class Pdf2Json:
                     if char_miner == '\n':
                         current_color = default_color
                         ColorKeyword = False
-                        keyword_set.add(ColorDiffStack.pop_all())
+                        temp_keyword = ColorDiffStack.pop_all()
+                        if len(temp_keyword) > 1:
+                            keyword_set.add(temp_keyword)
                         TextStack.extend(['<','k','e','>'])
                         
                     elif char_miner == ' ':
@@ -190,7 +202,9 @@ class Pdf2Json:
                 elif BoldKeyword:
                     if char_miner == '\n':
                         BoldKeyword = False
-                        keyword_set.add(BoldDiffStack.pop_all())
+                        temp_keyword = BoldDiffStack.pop_all()
+                        if len(temp_keyword) > 1:
+                            keyword_set.add(temp_keyword)
                         TextStack.extend(['<','k','e','>'])
                 
                     elif char_miner == ' ':
@@ -211,107 +225,7 @@ class Pdf2Json:
         temp = TextLine(text,size,location,keyword_set,page_num,box_num)
         self.TextList.append(temp)
         return index
-        
-    # def detect_diff(self, chars, textline, index, page_num, default_color):
     
-    #     # keyword checking stacks
-    #     FontDiffStack = SelectedStack()
-    #     ColorDiffStack = SelectedStack()
-    #     # keyword checking status
-    #     FontKeyword = False
-    #     ColorKeyword = False
-        
-    #     current_color = default_color
-
-    #     temp = TextLine(textline['text'], chars[index]['size'], chars[index]['x0'], [], page_num, textline['box number'])
-    #     keyword_set = set() 
-
-    #     for char_miner in textline['text']:
-    #         if char_miner == chars[index]['text']:
-    #             # COLOR 
-    #             # start keyword searching 
-    #             if current_color != str(chars[index]['non_stroking_color']) and ColorKeyword == False:
-    #                 current_color = str(chars[index]['non_stroking_color'])
-    #                 ColorKeyword = True
-    #                 ColorDiffStack.push(char_miner)
-    #             # continue keyword searching
-    #             elif current_color == str(chars[index]['non_stroking_color']) and ColorKeyword == True:
-    #                 ColorDiffStack.push(char_miner)
-    #             # stop keyword searching
-    #             elif current_color != str(chars[index]['non_stroking_color']) and ColorKeyword == True:
-    #                 current_color = str(chars[index]['non_stroking_color'])
-    #                 ColorKeyword = False
-    #                 keyword_set.add(ColorDiffStack.pop_all())
-    #             else:
-    #                 pass
-                            
-    #             # FONT
-    #             # start keyword searching 
-    #             if 'Bold' in chars[index]['fontname'] and FontKeyword == False:
-    #                 FontKeyword = True
-    #                 FontDiffStack.push(char_miner)
-    #             # continue keyword searching
-    #             elif 'Bold' in chars[index]['fontname'] and FontKeyword == True:
-    #                 FontDiffStack.push(char_miner)
-    #             # stop keyword searching
-    #             elif 'Bold' not in chars[index]['fontname'] and FontKeyword == True:
-    #                 FontKeyword = False
-    #                 keyword_set.add(FontDiffStack.pop_all())
-    #             else:
-    #                 pass
-                        
-                            
-    #             if index < len(chars) -1:
-    #                 index += 1
-
-    #         else:
-    #             if ColorKeyword and FontKeyword:
-    #                 if char_miner == '\n':
-    #                     current_color = default_color
-    #                     ColorKeyword = False
-    #                     keyword_set.add(ColorDiffStack.pop_all())
-                        
-    #                     FontKeyword = False
-    #                     FontDiffStack.push(' ')
-    #                 elif char_miner == ' ':
-    #                     ColorDiffStack.push(' ')
-    #                     FontDiffStack.push(' ')
-    #                 else:
-    #                     raise Exception('mismatching detected!!')
-                
-    #             elif ColorKeyword:
-    #                 if char_miner == '\n':
-    #                     current_color = default_color
-    #                     ColorKeyword = False
-    #                     keyword_set.add(ColorDiffStack.pop_all())
-                        
-    #                 elif char_miner == ' ':
-    #                     ColorDiffStack.push(' ')
-    #                 else:
-    #                     raise Exception('mismatching detected!!')
-                    
-    #             elif FontKeyword:
-    #                 if char_miner == '\n':
-    #                     FontKeyword = False
-    #                     keyword_set.add(FontDiffStack.pop_all())  
-    #                 elif char_miner == ' ':
-    #                     FontDiffStack.push(' ')
-    #                 else:
-    #                     raise Exception('mismatching detected!!')
-            
-    #             else: 
-    #                 if char_miner == '\n' or char_miner == ' ':
-    #                     continue
-    #                 else:
-    #                     raise Exception('mismatching detected!!')
-                
-    #     temp.keyword_set = keyword_set
-    #     self.TextList.append(temp)
-    
-    #     return index 
-
-
-
 
     def combine(self):
         combined_textline = self.TextList.pop(0)
@@ -340,7 +254,12 @@ class Pdf2Json:
                 combined_textline.keyword_set.update(temp.keyword_set)
             # 다른 텍스트 박스 첫 문장 넣기 
             else:
-                combined_textline.text = "".join(combined_text)
+                temp_text = "".join(combined_text)
+                if '<ke>\n<ks>' in temp_text:
+                    temp_text = temp_text.replace('<ke>\n<ks>', '')
+                    combined_textline.keyword_set.clear()
+                    
+                combined_textline.text = temp_text
                 self.combined_TextList.append(combined_textline)
 
                 combined_textline = self.TextList.pop(0)
@@ -348,8 +267,8 @@ class Pdf2Json:
                 current_box = combined_textline.box_num           
                 combined_text.clear()
                 combined_text.append(combined_textline.text.strip())
-
-
+        
+    
     def divide_by_theme(self, TextList):
         next_page_num = 1
         while TextList:
