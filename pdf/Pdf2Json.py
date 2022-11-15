@@ -126,9 +126,9 @@ class Pdf2Json:
         size = int(chars[index]['size'])
         location = 0
         if self.is_special_symbol(chars[index]['text']):
-            location = chars[index+1]['x1']
+            location = int(chars[index+1]['x0'])
         else:
-            location = chars[index]['x1']
+            location = chars[index]['x0']
         keyword_set = []
 
         for char_miner in textline:
@@ -203,6 +203,7 @@ class Pdf2Json:
         self.TextList.append(TextLine(textline,size,location,keyword_set,page_num))
         return index
 
+    # 해당 input이 특수문자인지 확인
     def is_special_symbol(self, input):
         if 48 <= ord(input) <= 57:
             return False
@@ -219,6 +220,7 @@ class Pdf2Json:
         else:
             return True
        
+    # TextLine을 Cell로 바꾸기
     def combine(self):
         combined_textline = self.TextList.pop(0)
         current_page = combined_textline.page_num
