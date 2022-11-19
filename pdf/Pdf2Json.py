@@ -30,7 +30,7 @@ class Pdf2Json:
         with open(FileString, 'rb') as input_file:
             with pdfplumber.PDF(input_file) as pdf_file:
                 for page_miner, page_plumber in zip(extract_pages(input_file), pdf_file.pages):
-                
+            
                     chars_plumber = page_plumber.chars
                     index = 0                       # index for indicating character page_plumber
                     page_default_color = pick_default_color(chars_plumber)
@@ -47,8 +47,8 @@ class Pdf2Json:
                             for textline in element:
                                 if isinstance(textline, LTTextLine):
                                     textlines.append(textline.get_text())
-                        
                                     
+                    
                     while textlines or pending_list:
                         if textlines:
                             textline = textlines.pop(0)
@@ -78,7 +78,7 @@ class Pdf2Json:
 
                         if pending_count > self.MAX_COUNT:
                             break
-                                    
+                 
                 if pending_list:
                     pending_list.clear()
                     print(page_plumber.page_number)
@@ -96,11 +96,13 @@ class Pdf2Json:
 
         current_color = default_color
         
-        size = int(chars[index]['size'])
+        size = 0
         location = 0
         if self.is_special_symbol(chars[index]['text']):
-            location = int(chars[index+1]['x0'])
+            size = chars[index+1]['size']
+            location = chars[index+1]['x0']
         else:
+            size = chars[index]['size']
             location = chars[index]['x0']
         keyword_set = []
 
@@ -209,10 +211,18 @@ class Pdf2Json:
                 # combine
                 if index > 0:
                     if not self.is_special_symbol(cell_text.text[0]):
-                        if abs(cell_text.size-current_page_cells[index-1].size) < 0.1 or abs(cell_text.location - current_page_cells[index-1].location) < 0.1:
+                        if abs(cell_text.size-current_page_cells[index-1].size) < 0.1 and abs(cell_text.location - current_page_cells[index-1].location) < cell_text.size/2:
                             current_page_cells[index-1].text = current_page_cells[index-1].text.strip() + " " + cell_text.text.strip()
                             current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
                             continue
+                        
+                        elif abs(cell_text.size-current_page_cells[index-1].size) < cell_text.size/3  and abs(cell_text.location - current_page_cells[index-1].location) < cell_text.size:
+                            current_page_cells[index-1].text = current_page_cells[index-1].text.strip() + "\n" + cell_text.text.strip()
+                            current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
+                            continue
+                        
+                        else:
+                            pass
                              
                 if len(cell_text.text.strip()) == 1:
                     if self.is_special_symbol(cell_text.text.strip()):
@@ -248,6 +258,26 @@ class Pdf2Json:
                 max_size = cell_text.size
                 index = 0
                 max_index = index
+                
+                
+        if current_page:
+            max_cell_text = current_page_cells.pop(max_index)
+            max_cell = {'text' : max_cell_text.text, 'keywords' : max_cell_text.keyword_set, 'subcells' : []}
+
+            # layering 
+            while current_page_cells:
+                temp = current_page_cells.pop(0)
+                cur_size = temp.size
+                cur_loc = temp.location
+                cur_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'subcells' : []}
+                max_cell['subcells'].append(cur_cell) 
+                return_code = self.layering(max_cell, cur_cell, cur_size, cur_loc, current_page_cells)
+                
+                if return_code == -1:
+                    break 
+            
+            self.CellList.append(max_cell)
+            
     
     # RETURN CODE
     # -1 : empty list
@@ -259,7 +289,7 @@ class Pdf2Json:
 
         temp = page_cells[0]
         if self.is_special_symbol(temp.text[0]):
-            if temp.size == cur_size and temp.location == cur_loc:
+            if abs(temp.size - cur_size) < 1 and abs(temp.location - cur_loc) < temp.size/2:
                 temp = page_cells.pop(0)
                 temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'subcells' : []}
                 parent_cell['subcells'].append(temp_cell)
@@ -267,13 +297,13 @@ class Pdf2Json:
                 if return_code == 1:
                     return 1
                 
-            elif temp.size <= cur_size and temp.location > cur_loc:
+            elif (temp.size <= cur_size or abs(temp.size - cur_size) < 0.1) and temp.location > cur_loc:
                 temp = page_cells.pop(0)
                 temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'subcells' : []}
                 cur_cell['subcells'].append(temp_cell)
                 return_code = self.layering(cur_cell, temp_cell, temp.size, temp.location, page_cells)
                 if return_code == 1:
-                    if page_cells[0].size == cur_size and page_cells[0].location == cur_loc:
+                    if abs(page_cells[0].size - cur_size) < 1 and abs(page_cells[0].location - cur_loc) < 0.1:
                         temp = page_cells.pop(0)
                         temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'subcells' : []}
                         parent_cell['subcells'].append(temp_cell)

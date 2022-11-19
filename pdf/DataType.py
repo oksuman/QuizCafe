@@ -3,8 +3,8 @@ from dataclasses import dataclass
 @dataclass
 class TextLine:
     text: str
-    size: int            
-    location: int         # point where textline starts
+    size: float          
+    location: float         # point where textline starts
     keyword_set: list     # based on changes of color or size
     page_num : int        # page number that textline came from 
 
