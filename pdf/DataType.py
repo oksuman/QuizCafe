@@ -8,6 +8,14 @@ class TextLine:
     keyword_set: list     # based on changes of color or size
     page_num : int        # page number that textline came from 
 
+    
+@dataclass
+class Cell:
+    text : str
+    keywords : list
+    subcells : list 
+
+    
 
 @dataclass
 class Theme:
@@ -38,19 +46,3 @@ class Arrows:
                 self.array.append(input_arrow)   
         else:
             self.array.append(input_arrow)
-    
-@dataclass
-class cell:
-    text : str
-    keywords : list
-    
-@dataclass
-class tuho:
-    label : cell
-    contents : list 
-    
-    # 큰 투호는 contents가 투호들의 list
-    # 작은 투호는 contents가 cell들의 list
-
- 
-    
