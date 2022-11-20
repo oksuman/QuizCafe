@@ -15,16 +15,18 @@ class Pdf2Json:
     def __init__(self, _FileSet : list):
         self.MAX_COUNT : final = 100                # max pending counting
         self.FileSet = _FileSet
-        self.TextList = []                          # list of TextLine
-        self.CellList = []
+        self.TextList = deque()                          # list of TextLine
+        self.CellList = deque()
+        self.TopicList = [] 
 
     def pdf_to_data(self):
         for file in self.FileSet:
             self.read_pdf(file)
             self.textline_layering()
+            self.divide_by_topic()
             
             with open('output.json', 'w', encoding="utf-8") as output:
-                json.dump(self.CellList, output, ensure_ascii=False, indent='\t')   
+                json.dump(self.TopicList, output, ensure_ascii=False, indent='\t')   
 
     def read_pdf(self, FileString : string):
         with open(FileString, 'rb') as input_file:
@@ -34,6 +36,8 @@ class Pdf2Json:
                     chars_plumber = page_plumber.chars
                     index = 0                       # index for indicating character page_plumber
                     page_default_color = pick_default_color(chars_plumber)
+                    bold_check = need_bold_check(chars_plumber)
+                    
                     page_number = page_plumber.page_number
                     
                     textlines = []
@@ -58,7 +62,7 @@ class Pdf2Json:
 
                         if textline[0] == chars_plumber[index]['text']:
                             try:
-                                index = self.detect_diff(chars_plumber, textline, index, page_number, page_default_color)
+                                index = self.detect_diff(chars_plumber, textline, index, page_number, page_default_color, bold_check)
                             except: 
                                 pending_list.append(textline)
                                 continue
@@ -69,7 +73,7 @@ class Pdf2Json:
                                 if pending_list[pending_index][0] == chars_plumber[index]['text']:    
                                     pending_textline = pending_list.pop(pending_index)
                                     try:
-                                        index = self.detect_diff(chars_plumber, pending_textline, index, page_number, page_default_color)
+                                        index = self.detect_diff(chars_plumber, pending_textline, index, page_number, page_default_color, bold_check)
                                     except:
                                         pending_list.append(pending_textline)  
                                     break       
@@ -86,7 +90,7 @@ class Pdf2Json:
             
 
 
-    def detect_diff(self, chars, textline, index, page_num, default_color):
+    def detect_diff(self, chars, textline, index, page_num, default_color, bold_check):
         # keyword checking stacks
         ColorDiffStack = SelectedStack()
         BoldDiffStack = SelectedStack()
@@ -95,9 +99,14 @@ class Pdf2Json:
         BoldKeyword = False
 
         current_color = default_color
-        
+                        
         size = 0
         location = 0
+        if textline[0] == ' ':
+            textline = textline.lstrip()
+        while chars[index]['text'] == ' ':
+            index += 1
+            
         if self.is_special_symbol(chars[index]['text']):
             size = chars[index+1]['size']
             location = chars[index+1]['x0']
@@ -128,14 +137,14 @@ class Pdf2Json:
 
                 # FONT
                 # start keyword searching 
-                if 'Bold' in chars[index]['fontname'] and not BoldKeyword and not ColorKeyword:
+                if 'Bold' in chars[index]['fontname'] and not BoldKeyword and not ColorKeyword and bold_check:
                     BoldKeyword = True
                     BoldDiffStack.push(char_miner)
                 # continue keyword searching
-                elif 'Bold' in chars[index]['fontname'] and BoldKeyword:
+                elif 'Bold' in chars[index]['fontname'] and BoldKeyword and bold_check:
                     BoldDiffStack.push(char_miner)
                 # stop keyword searching
-                elif 'Bold' not in chars[index]['fontname'] and BoldKeyword:
+                elif 'Bold' not in chars[index]['fontname'] and BoldKeyword and bold_check:
                     BoldKeyword = False
                     keyword_set.append(BoldDiffStack.pop_all())
 
@@ -187,16 +196,14 @@ class Pdf2Json:
             return False  
         elif 44032 <= ord(input) <= 55215:
             return False  
-        elif ord(input) == 32:
-            return False
-        elif ord(input) == 10:
+        elif ord(input) == 10 or ord(input) == 32 or ord(input) == 34 or ord(input) == 39 or ord(input) == 40 or ord(input) == 8220:
             return False
         else:
             return True
        
     # TextLine을 Cell로 바꾸기
     def textline_layering(self):
-        cell_text = self.TextList.pop(0)
+        cell_text = self.TextList.popleft()
         current_page_cells = []
         current_page_cells.append(cell_text)
         
@@ -207,11 +214,16 @@ class Pdf2Json:
         
         while self.TextList:
             if self.TextList[0].page_num == current_page:
-                cell_text = self.TextList.pop(0)
+                cell_text = self.TextList.popleft()
                 # combine
                 if index > 0:
                     if not self.is_special_symbol(cell_text.text[0]):
                         if abs(cell_text.size-current_page_cells[index-1].size) < 0.1 and abs(cell_text.location - current_page_cells[index-1].location) < cell_text.size/2:
+                            current_page_cells[index-1].text = current_page_cells[index-1].text.strip() + " " + cell_text.text.strip()
+                            current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
+                            continue
+                        
+                        elif abs(cell_text.size-current_page_cells[index-1].size) < 0.1 and len(current_page_cells[index-1].text) == 1:
                             current_page_cells[index-1].text = current_page_cells[index-1].text.strip() + " " + cell_text.text.strip()
                             current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
                             continue
@@ -237,15 +249,15 @@ class Pdf2Json:
                 index += 1
             else:
                 max_cell_text = current_page_cells.pop(max_index)
-                max_cell = {'text' : max_cell_text.text, 'keywords' : max_cell_text.keyword_set, 'subcells' : []}
+                max_cell = {'topic' : max_cell_text.text.strip(), 'keywords' : max_cell_text.keyword_set, 'page' : [max_cell_text.page_num],'sentences' : []}
     
                 # layering 
                 while current_page_cells:
                     temp = current_page_cells.pop(0)
                     cur_size = temp.size
                     cur_loc = temp.location
-                    cur_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'subcells' : []}
-                    max_cell['subcells'].append(cur_cell) 
+                    cur_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+                    max_cell['sentences'].append(cur_cell) 
                     return_code = self.layering(max_cell, cur_cell, cur_size, cur_loc, current_page_cells)
                     
                     if return_code == -1:
@@ -262,15 +274,15 @@ class Pdf2Json:
                 
         if current_page:
             max_cell_text = current_page_cells.pop(max_index)
-            max_cell = {'text' : max_cell_text.text, 'keywords' : max_cell_text.keyword_set, 'subcells' : []}
+            max_cell = {'topic' : max_cell_text.text, 'keywords' : max_cell_text.keyword_set, 'page' : [max_cell_text.page_num],'sentences' : []}
 
             # layering 
             while current_page_cells:
                 temp = current_page_cells.pop(0)
                 cur_size = temp.size
                 cur_loc = temp.location
-                cur_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'subcells' : []}
-                max_cell['subcells'].append(cur_cell) 
+                cur_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+                max_cell['sentences'].append(cur_cell) 
                 return_code = self.layering(max_cell, cur_cell, cur_size, cur_loc, current_page_cells)
                 
                 if return_code == -1:
@@ -289,24 +301,24 @@ class Pdf2Json:
 
         temp = page_cells[0]
         if self.is_special_symbol(temp.text[0]):
-            if abs(temp.size - cur_size) < 1 and abs(temp.location - cur_loc) < temp.size/2:
+            if abs(temp.size - cur_size) < 1 and abs(temp.location - cur_loc) < temp.size/5:
                 temp = page_cells.pop(0)
-                temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'subcells' : []}
-                parent_cell['subcells'].append(temp_cell)
+                temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+                parent_cell['sentences'].append(temp_cell)
                 return_code = self.layering(parent_cell, temp_cell, temp.size, temp.location, page_cells)
                 if return_code == 1:
                     return 1
                 
             elif (temp.size <= cur_size or abs(temp.size - cur_size) < 0.1) and temp.location > cur_loc:
                 temp = page_cells.pop(0)
-                temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'subcells' : []}
-                cur_cell['subcells'].append(temp_cell)
+                temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+                cur_cell['sentences'].append(temp_cell)
                 return_code = self.layering(cur_cell, temp_cell, temp.size, temp.location, page_cells)
                 if return_code == 1:
                     if abs(page_cells[0].size - cur_size) < 1 and abs(page_cells[0].location - cur_loc) < 0.1:
                         temp = page_cells.pop(0)
-                        temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'subcells' : []}
-                        parent_cell['subcells'].append(temp_cell)
+                        temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+                        parent_cell['sentences'].append(temp_cell)
                         return_code = self.layering(parent_cell, temp_cell, temp.size, temp.location, page_cells)
                         if return_code == 1:
                             return 1
@@ -323,6 +335,20 @@ class Pdf2Json:
                 return 0
         else:
             return 0
+        
+    def divide_by_topic(self):
+        self.TopicList.append(self.CellList.popleft())
+    
+        while self.CellList:
+            temp = self.CellList.popleft()
+            if temp['topic'] == self.TopicList[-1]['topic']:
+                self.TopicList[-1]['sentences'].extend(temp['sentences'])
+                self.TopicList[-1]['page'].extend(temp['page'])
+                
+            else:
+                self.TopicList.append(temp)
+                
+            
 
        
             

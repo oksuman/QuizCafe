@@ -27,3 +27,17 @@ def pick_default_font(chars):
             font_list[char_plumber['fontname']] = 0
     
     return max(font_list,key=font_list.get)
+
+def need_bold_check(chars):
+    char_num = len(chars)
+    bold_count = 0
+    for char in chars:
+        if 'Bold' in char['fontname']:
+            bold_count += 1
+            
+    if char_num < 2*bold_count:
+        return False
+    else:
+        return True
+    
+    
