@@ -13,23 +13,21 @@ class Pdf2Json:
     def __init__(self, _FileSet: list):
         self.MAX_COUNT: final = 300  # max pending counting
         self.FileSet = _FileSet
-        self.data = {}
+        self.data = []
         self.TextList = []  # list of TextLine
         self.combined_TextList = []  # list of TextLine
         self.ThemeList = []  # list of Theme
 
     def pdf_to_json(self):
-        output_numbering = 1
         for file in self.FileSet:
             self.read_pdf(file)
             self.combine()
             self.divide_by_theme(self.combined_TextList)
-            self.write_json("output" + str(output_numbering))
+            self.write_json()
 
             self.TextList.clear()
             self.combined_TextList.clear()
             self.ThemeList.clear()
-            output_numbering += 1
 
     def read_pdf(self, FileString: string):
         input_file = BytesIO(FileString)
@@ -91,9 +89,7 @@ class Pdf2Json:
                     print(page_plumber.page_number)
                     print('pdf extraction is not perfect !!')
 
-    def write_json(self, tag: string):
-        self.data = {tag: []}
-
+    def write_json(self):
         for theme in self.ThemeList:
             theme_dic = {'Theme': '', 'Texts': []}
             textline_dic = {'Text': '', 'Keyword': []}
@@ -106,7 +102,7 @@ class Pdf2Json:
 
                 textline_dic = {'Text': '', 'Keyword': []}
 
-            self.data[tag].append(theme_dic)
+            self.data.append(theme_dic)
 
 
     def detect_diff(self, chars, textline, index, page_num, default_color):
