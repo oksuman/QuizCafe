@@ -125,6 +125,7 @@ class Pdf2Json:
             size = chars[index]['size']
         elif self.is_special_symbol(chars[index]['text']) == 3:
             symbol_start = True
+            size = chars[index]['size']
             state = 2
 
         for char_miner in textline:
@@ -142,7 +143,6 @@ class Pdf2Json:
                 if state == 2:
                     if self.is_special_symbol(chars[index]['text']) == 1:
                         x1 = chars[index]['x0']
-                        size = chars[index]['size']
                         state = 0
         
                 # COLOR
@@ -245,7 +245,7 @@ class Pdf2Json:
                 # combine
                 if index > 0:
                     if not cell_text.symbol_start:
-                        if abs(cell_text.size-current_page_cells[index-1].size) < 0.1 and abs(cell_text.x1 - current_page_cells[index-1].x1) < cell_text.size/5 and abs(cell_text.y0 - current_page_cells[index-1].y0) < 5*cell_text.size:
+                        if abs(cell_text.size-current_page_cells[index-1].size) < 0.1 and abs(cell_text.x1 - current_page_cells[index-1].x1) < cell_text.size/5 and abs(cell_text.y0 - current_page_cells[index-1].y0) < 3*cell_text.size:
                             # 잘린 키워드
                             if current_page_cells[index-1].tail_keyword and cell_text.head_keyword:
                                 current_page_cells[index-1].text = current_page_cells[index-1].text.strip()  + cell_text.text.strip()
@@ -255,6 +255,7 @@ class Pdf2Json:
                             else:
                                 current_page_cells[index-1].text = current_page_cells[index-1].text.strip() + " " + cell_text.text.strip()
                                 current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
+                            current_page_cells[index-1].y0 = cell_text.y0
                             continue
                         
                         # and len(current_page_cells[index-1].text) == 1 
@@ -265,6 +266,7 @@ class Pdf2Json:
                                 combined_keyword = current_page_cells[index-1].keyword_set.pop() + cell_text.keyword_set.pop(0)
                                 current_page_cells[index-1].keyword_set.append(combined_keyword)
                             current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
+                            current_page_cells[index-1].x1 = cell_text.x1
                             continue
                         
                         elif abs(cell_text.size-current_page_cells[index-1].size) < cell_text.size/3  and abs(cell_text.x1 - current_page_cells[index-1].x1) < cell_text.size and abs(cell_text.y0 - current_page_cells[index-1].y0) < 3* cell_text.size:
