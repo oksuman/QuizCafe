@@ -1,6 +1,6 @@
 import pdfplumber
 
-with open('pdf/samples/open.pdf', 'rb') as input_file:
+with open('QuizCafe/pdf/samples/open.pdf', 'rb') as input_file:
     with pdfplumber.PDF(input_file) as pdf_file:
         for page_plumber in pdf_file.pages:
             if page_plumber.page_number == 8:

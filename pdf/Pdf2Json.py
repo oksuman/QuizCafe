@@ -120,6 +120,7 @@ class Pdf2Json:
         y0 = chars[index]['y0']
         
         if self.is_special_symbol(chars[index]['text']) == 0:
+            size = chars[index]['size']
             state = 1 
         elif self.is_special_symbol(chars[index]['text']) == 1:
             x1 = chars[index]['x0'] 
@@ -134,13 +135,11 @@ class Pdf2Json:
 
                 if state == 1:
                     if self.is_special_symbol(chars[index]['text']) == 1:
-                        size = chars[index]['size']
+                        x1 = x0
                         state = 0
                     elif self.is_special_symbol(chars[index]['text']) == 3:
-                        x1 = chars[index]['x0']
-                        size = chars[index]['size']
                         symbol_start = True
-                        state = 0
+                        state = 2
                 if state == 2:
                     if self.is_special_symbol(chars[index]['text']) == 1:
                         x1 = chars[index]['x0']
@@ -351,7 +350,7 @@ class Pdf2Json:
         temp = page_cells[0]
         # if temp.symbol_start:
         # 형제로 
-        if abs(temp.size - cur_size) < 0.1 and abs(temp.x0 - cur_loc) < temp.size/5:
+        if abs(temp.size - cur_size) < 0.1 and abs(temp.x0 - cur_loc) < temp.size/2:
             temp = page_cells.pop(0)
             temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
             parent_cell['sentences'].append(temp_cell)
