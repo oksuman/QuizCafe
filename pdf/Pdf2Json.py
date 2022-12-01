@@ -39,10 +39,6 @@ class Pdf2Json:
                     chars_plumber = page_plumber.chars
                     index = 0                       # index for indicating character page_plumber
 
-                    page_default_color = pick_default_color(chars_plumber, self.color_list)
-                    bold_check = need_bold_check(chars_plumber)
-                    self.page_height = page_plumber.height
-                    page_number = page_plumber.page_number
                     
                     textlines = []
                     pending_list = []
@@ -56,7 +52,12 @@ class Pdf2Json:
                                 if isinstance(textline, LTTextLine):
                                     textlines.append(textline.get_text())
                                     
-                    
+                    if textlines:
+                        page_default_color = pick_default_color(chars_plumber, self.color_list)
+                        bold_check = need_bold_check(chars_plumber)
+                        self.page_height = page_plumber.height
+                        page_number = page_plumber.page_number
+
                     while textlines or pending_list:
                         if textlines:
                             textline = textlines.pop(0)
