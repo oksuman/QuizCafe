@@ -8,8 +8,7 @@ def pick_default_stroking_color(chars):
     
     return max(stroking_color_list,key=stroking_color_list.get)
 
-def pick_default_color(chars):
-    color_list = {}
+def pick_default_color(chars, color_list):
     for char_plumber in chars:
         if str(char_plumber['non_stroking_color']) in color_list:
             color_list[str(char_plumber['non_stroking_color'])] += 1
@@ -23,7 +22,7 @@ def pick_default_font(chars):
     for char_plumber in chars:
         if char_plumber['fontname'] in font_list:
             font_list[char_plumber['fontname']] += 1
-        else:
+        else: 
             font_list[char_plumber['fontname']] = 0
     
     return max(font_list,key=font_list.get)
@@ -40,4 +39,10 @@ def need_bold_check(chars):
     else:
         return True
     
-    
+def mean_font_size(chars):
+    size_sum = 0
+    char_count = 0
+    for char in chars:
+        size_sum += char['size']
+        char_count += 1 
+    return size_sum/char_count

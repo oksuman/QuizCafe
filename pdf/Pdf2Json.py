@@ -13,14 +13,17 @@ from Default import *
 
 class Pdf2Json:
     def __init__(self, _FileSet : list):
-        self.MAX_COUNT : final = 100                # max pending counting
+        self.MAX_COUNT : final = 50                      # max pending counting
         self.FileSet = _FileSet
         self.TextList = deque()                          # list of TextLine
         self.CellList = deque()
         self.TopicList = [] 
+        self.color_list = {}
+        self.page_height = 0
 
     def pdf_to_data(self):
         for file in self.FileSet:
+            self.color_list = {}
             self.read_pdf(file)
             self.textline_layering()
             self.divide_by_topic()
@@ -35,9 +38,10 @@ class Pdf2Json:
             
                     chars_plumber = page_plumber.chars
                     index = 0                       # index for indicating character page_plumber
-                    page_default_color = pick_default_color(chars_plumber)
+
+                    page_default_color = pick_default_color(chars_plumber, self.color_list)
                     bold_check = need_bold_check(chars_plumber)
-                    
+                    self.page_height = page_plumber.height
                     page_number = page_plumber.page_number
                     
                     textlines = []
@@ -86,43 +90,69 @@ class Pdf2Json:
                 if pending_list:
                     pending_list.clear()
                     print(page_plumber.page_number)
-                    print('pdf extracion is not perfect !!')
-            
-
+                    print('pdf extracion is not perfect !!')  
 
     def detect_diff(self, chars, textline, index, page_num, default_color, bold_check):
+        current_color = default_color
         # keyword checking stacks
         ColorDiffStack = SelectedStack()
         BoldDiffStack = SelectedStack()
         # keyword checking status
         ColorKeyword = False
         BoldKeyword = False
+        head_keyword = False
+        tail_keyword = False
+        symbol_start = False 
+        keyword_set = []
 
-        current_color = default_color
-                        
-        size = 0
-        location = 0
-        if textline[0] == ' ':
-            textline = textline.lstrip()
+        textline = textline.lstrip()
         while chars[index]['text'] == ' ':
             index += 1
-            
-        if self.is_special_symbol(chars[index]['text']):
-            size = chars[index+1]['size']
-            location = chars[index+1]['x0']
-        else:
+
+        cursor = 0  # cursor that indicate miner text 
+        end_point = len(textline)
+        state = 0
+
+        size = 0
+        x0 = chars[index]['x0'] 
+        x1 = 0
+        y0 = chars[index]['y0']
+        
+        if self.is_special_symbol(chars[index]['text']) == 0:
+            state = 1 
+        elif self.is_special_symbol(chars[index]['text']) == 1:
+            x1 = chars[index]['x0'] 
             size = chars[index]['size']
-            location = chars[index]['x0']
-        keyword_set = []
+        elif self.is_special_symbol(chars[index]['text']) == 3:
+            symbol_start = True
+            state = 2
 
         for char_miner in textline:
             if char_miner == chars[index]['text']:
+
+                if state == 1:
+                    if self.is_special_symbol(chars[index]['text']) == 1:
+                        size = chars[index]['size']
+                        state = 0
+                    elif self.is_special_symbol(chars[index]['text']) == 3:
+                        x1 = chars[index]['x0']
+                        size = chars[index]['size']
+                        symbol_start = True
+                        state = 0
+                if state == 2:
+                    if self.is_special_symbol(chars[index]['text']) == 1:
+                        x1 = chars[index]['x0']
+                        size = chars[index]['size']
+                        state = 0
+        
                 # COLOR
                 # start keyword searching 
                 if current_color != str(chars[index]['non_stroking_color']) and not ColorKeyword and not BoldKeyword:
                     current_color = str(chars[index]['non_stroking_color'])
                     ColorKeyword = True
                     ColorDiffStack.push(char_miner)
+                    if cursor == 0:
+                        head_keyword = True
                 # continue keyword searching
                 elif current_color == str(chars[index]['non_stroking_color']) and ColorKeyword:
                     ColorDiffStack.push(char_miner)
@@ -131,7 +161,8 @@ class Pdf2Json:
                     current_color = str(chars[index]['non_stroking_color'])
                     ColorKeyword = False
                     keyword_set.append(ColorDiffStack.pop_all())
-                    
+                    if cursor == end_point - 1:
+                        tail_keyword = True 
                 else:
                     pass
 
@@ -140,6 +171,8 @@ class Pdf2Json:
                 if 'Bold' in chars[index]['fontname'] and not BoldKeyword and not ColorKeyword and bold_check:
                     BoldKeyword = True
                     BoldDiffStack.push(char_miner)
+                    if cursor == 0:
+                        head_keyword = True
                 # continue keyword searching
                 elif 'Bold' in chars[index]['fontname'] and BoldKeyword and bold_check:
                     BoldDiffStack.push(char_miner)
@@ -147,11 +180,13 @@ class Pdf2Json:
                 elif 'Bold' not in chars[index]['fontname'] and BoldKeyword and bold_check:
                     BoldKeyword = False
                     keyword_set.append(BoldDiffStack.pop_all())
+                    if cursor == end_point - 1:
+                        tail_keyword = True 
 
                     if current_color != str(chars[index]['non_stroking_color']) and not ColorKeyword and not BoldKeyword:
                         current_color = str(chars[index]['non_stroking_color'])
                         ColorKeyword = True
-                        ColorDiffStack.push(char_miner)
+                        ColorDiffStack.push(char_miner)    
                 else:
                     pass
                 
@@ -163,7 +198,8 @@ class Pdf2Json:
                     if char_miner == '\n':
                         current_color = default_color
                         ColorKeyword = False
-                        keyword_set.append(ColorDiffStack.pop_all())             
+                        keyword_set.append(ColorDiffStack.pop_all())    
+                        tail_keyword = True         
                     elif char_miner == ' ':
                         ColorDiffStack.push(' ')
                     else:
@@ -173,6 +209,7 @@ class Pdf2Json:
                     if char_miner == '\n':
                         BoldKeyword = False
                         keyword_set.append(BoldDiffStack.pop_all())
+                        tail_keyword = True 
                     elif char_miner == ' ':
                         BoldDiffStack.push(' ')
                     else:
@@ -180,26 +217,15 @@ class Pdf2Json:
                 else:
                     if char_miner == '\n' or char_miner == ' ':
                         continue
+                    elif chars[index]['text'] == ' ':
+                        index+=1
                     else:
                         raise Exception('mismatching detected!!')
-            
-        self.TextList.append(TextLine(textline,size,location,keyword_set,page_num))
-        return index
 
-    # 해당 input이 특수문자인지 확인
-    def is_special_symbol(self, input):
-        if 48 <= ord(input) <= 57:
-            return False
-        elif 65 <= ord(input) <= 90:
-            return False  
-        elif 97 <= ord(input) <= 122:
-            return False  
-        elif 44032 <= ord(input) <= 55215:
-            return False  
-        elif ord(input) == 10 or ord(input) == 32 or ord(input) == 34 or ord(input) == 39 or ord(input) == 40 or ord(input) == 8220:
-            return False
-        else:
-            return True
+            cursor += 1
+        if self.page_height/10 - size < y0 < self.page_height/10 * 9 + size:
+            self.TextList.append(TextLine(textline, size, x0, x1, y0, keyword_set, page_num, head_keyword, tail_keyword, symbol_start))
+        return index
        
     # TextLine을 Cell로 바꾸기
     def textline_layering(self):
@@ -209,6 +235,7 @@ class Pdf2Json:
         
         current_page = cell_text.page_num
         max_size = cell_text.size
+        max_y = cell_text.y0
         index = 0
         max_index = index
         
@@ -217,18 +244,30 @@ class Pdf2Json:
                 cell_text = self.TextList.popleft()
                 # combine
                 if index > 0:
-                    if not self.is_special_symbol(cell_text.text[0]):
-                        if abs(cell_text.size-current_page_cells[index-1].size) < 0.1 and abs(cell_text.location - current_page_cells[index-1].location) < cell_text.size/2:
+                    if not cell_text.symbol_start:
+                        if abs(cell_text.size-current_page_cells[index-1].size) < 0.1 and abs(cell_text.x1 - current_page_cells[index-1].x1) < cell_text.size/5 and abs(cell_text.y0 - current_page_cells[index-1].y0) < 5*cell_text.size:
+                            # 잘린 키워드
+                            if current_page_cells[index-1].tail_keyword and cell_text.head_keyword:
+                                current_page_cells[index-1].text = current_page_cells[index-1].text.strip()  + cell_text.text.strip()
+                                combined_keyword = current_page_cells[index-1].keyword_set.pop() + cell_text.keyword_set.pop(0)
+                                current_page_cells[index-1].keyword_set.append(combined_keyword)
+                                current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
+                            else:
+                                current_page_cells[index-1].text = current_page_cells[index-1].text.strip() + " " + cell_text.text.strip()
+                                current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
+                            continue
+                        
+                        # and len(current_page_cells[index-1].text) == 1 
+                        elif abs(cell_text.size-current_page_cells[index-1].size) < 0.1 and abs(current_page_cells[index-1].y0-cell_text.y0) < 0.1:
                             current_page_cells[index-1].text = current_page_cells[index-1].text.strip() + " " + cell_text.text.strip()
+                            # 잘린 키워드
+                            if current_page_cells[index-1].tail_keyword and cell_text.head_keyword:
+                                combined_keyword = current_page_cells[index-1].keyword_set.pop() + cell_text.keyword_set.pop(0)
+                                current_page_cells[index-1].keyword_set.append(combined_keyword)
                             current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
                             continue
                         
-                        elif abs(cell_text.size-current_page_cells[index-1].size) < 0.1 and len(current_page_cells[index-1].text) == 1:
-                            current_page_cells[index-1].text = current_page_cells[index-1].text.strip() + " " + cell_text.text.strip()
-                            current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
-                            continue
-                        
-                        elif abs(cell_text.size-current_page_cells[index-1].size) < cell_text.size/3  and abs(cell_text.location - current_page_cells[index-1].location) < cell_text.size:
+                        elif abs(cell_text.size-current_page_cells[index-1].size) < cell_text.size/3  and abs(cell_text.x1 - current_page_cells[index-1].x1) < cell_text.size and abs(cell_text.y0 - current_page_cells[index-1].y0) < 3* cell_text.size:
                             current_page_cells[index-1].text = current_page_cells[index-1].text.strip() + "\n" + cell_text.text.strip()
                             current_page_cells[index-1].keyword_set.extend(cell_text.keyword_set)
                             continue
@@ -237,15 +276,21 @@ class Pdf2Json:
                             pass
                              
                 if len(cell_text.text.strip()) == 1:
-                    if self.is_special_symbol(cell_text.text.strip()):
-                        cell_text.text = cell_text.text.strip()
+                    if self.is_special_symbol(cell_text.text.strip()) == 3:
+                            if cell_text.text.strip() == '.':
+                                continue
+                            else:
+                                cell_text.text = cell_text.text.strip()
                     else:
                         continue
                     
                 current_page_cells.append(cell_text)
-                if cell_text.size > max_size:
-                    max_size = cell_text.size
-                    max_index = index      
+                if cell_text.size > max_size and cell_text.y0 > self.page_height/2:
+                    if cell_text.y0 < max_y and abs(cell_text.size - max_size) < 0.1:
+                        pass
+                    else:
+                        max_size = cell_text.size
+                        max_index = index      
                 index += 1
             else:
                 max_cell_text = current_page_cells.pop(max_index)
@@ -255,7 +300,7 @@ class Pdf2Json:
                 while current_page_cells:
                     temp = current_page_cells.pop(0)
                     cur_size = temp.size
-                    cur_loc = temp.location
+                    cur_loc = temp.x0
                     cur_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
                     max_cell['sentences'].append(cur_cell) 
                     return_code = self.layering(max_cell, cur_cell, cur_size, cur_loc, current_page_cells)
@@ -268,6 +313,7 @@ class Pdf2Json:
                 cell_text = self.TextList[0]
                 current_page = cell_text.page_num
                 max_size = cell_text.size
+                max_y = cell_text.y0
                 index = 0
                 max_index = index
                 
@@ -280,7 +326,7 @@ class Pdf2Json:
             while current_page_cells:
                 temp = current_page_cells.pop(0)
                 cur_size = temp.size
-                cur_loc = temp.location
+                cur_loc = temp.x0
                 cur_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
                 max_cell['sentences'].append(cur_cell) 
                 return_code = self.layering(max_cell, cur_cell, cur_size, cur_loc, current_page_cells)
@@ -291,7 +337,7 @@ class Pdf2Json:
             self.CellList.append(max_cell)
             
     
-    # RETURN CODE
+    ### RETURN CODE ###
     # -1 : empty list
     # 0 : terminate layering
     # 1 : return to caller 
@@ -300,41 +346,43 @@ class Pdf2Json:
             return -1
 
         temp = page_cells[0]
-        if self.is_special_symbol(temp.text[0]):
-            if abs(temp.size - cur_size) < 1 and abs(temp.location - cur_loc) < temp.size/5:
-                temp = page_cells.pop(0)
-                temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
-                parent_cell['sentences'].append(temp_cell)
-                return_code = self.layering(parent_cell, temp_cell, temp.size, temp.location, page_cells)
-                if return_code == 1:
-                    return 1
-                
-            elif (temp.size <= cur_size or abs(temp.size - cur_size) < 0.1) and temp.location > cur_loc:
-                temp = page_cells.pop(0)
-                temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
-                cur_cell['sentences'].append(temp_cell)
-                return_code = self.layering(cur_cell, temp_cell, temp.size, temp.location, page_cells)
-                if return_code == 1:
-                    if abs(page_cells[0].size - cur_size) < 1 and abs(page_cells[0].location - cur_loc) < 0.1:
-                        temp = page_cells.pop(0)
-                        temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
-                        parent_cell['sentences'].append(temp_cell)
-                        return_code = self.layering(parent_cell, temp_cell, temp.size, temp.location, page_cells)
-                        if return_code == 1:
-                            return 1
-                                
-                    elif page_cells[0].size >= cur_size and page_cells[0].location < cur_loc:
-                        return 1 
-                    else: 
-                        return 0
-                
-            elif temp.size >= cur_size and temp.location < cur_loc:
+        # if temp.symbol_start:
+        # 형제로 
+        if abs(temp.size - cur_size) < 0.1 and abs(temp.x0 - cur_loc) < temp.size/5:
+            temp = page_cells.pop(0)
+            temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+            parent_cell['sentences'].append(temp_cell)
+            return_code = self.layering(parent_cell, temp_cell, temp.size, temp.x0, page_cells)
+            if return_code == 1:
                 return 1
+
+        # 자식으로  
+        elif (temp.size <= cur_size or abs(temp.size - cur_size) < 0.1) and temp.x0 > cur_loc:
+            temp = page_cells.pop(0)
+            temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+            cur_cell['sentences'].append(temp_cell)
+            return_code = self.layering(cur_cell, temp_cell, temp.size, temp.x0, page_cells)
+            if return_code == 1:
+                if abs(page_cells[0].size - cur_size) < 1 and abs(page_cells[0].x0 - cur_loc) < 0.1:
+                    temp = page_cells.pop(0)
+                    temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+                    parent_cell['sentences'].append(temp_cell)
+                    return_code = self.layering(parent_cell, temp_cell, temp.size, temp.x0, page_cells)
+                    if return_code == 1:
+                        return 1
+                            
+                elif page_cells[0].size >= cur_size and page_cells[0].x0 < cur_loc:
+                    return 1 
+                else: 
+                    return 0
             
-            else:
-                return 0
+        elif temp.size >= cur_size and temp.x0 < cur_loc:
+            return 1
+        
         else:
             return 0
+        #else:
+        #    return 0
         
     def divide_by_topic(self):
         self.TopicList.append(self.CellList.popleft())
@@ -348,9 +396,50 @@ class Pdf2Json:
             else:
                 self.TopicList.append(temp)
                 
-            
+    ## 해당 input이 특수문자인지 확인
+    # 첫 글자가 숫자인 경우는 두번째 글자도 확인 -> 두번째가 특수문자면 특수문자 취급
+    # 
+    # def is_special_symbol(self, input1, input2):
+    #     if 48 <= ord(input1) <= 57:              #digit 
+    #         if input2 == 'None':
+    #             return False
+    #         else:
+    #             if self.is_special_symbol(input2, 'None'):
+    #                 return True
+    #             else:
+    #                 return False   
+    #     elif 65 <= ord(input1) <= 90:            #eng
+    #         return False  
+    #     elif 97 <= ord(input1) <= 122:           #eng
+    #         return False  
+    #     elif 44032 <= ord(input1) <= 55215:      #kor 
+    #         return False  
+    #     elif ord(input1) == 10 or ord(input1) == 32 or ord(input1) == 34 or ord(input1) == 39 or ord(input1) == 8220:
+    #         return False
+    #     else:
+    #         return True       
 
-       
+    ### Return code
+    # 0 : digit
+    # 1 : eng /kor/ etc.. 
+    # 2 : blank space 
+    # 3 : special symbol
+    def is_special_symbol(self, input):
+        if 48 <= ord(input) <= 57:              #digit 
+            return 0  
+        elif 65 <= ord(input) <= 90:            #eng
+            return 1  
+        elif 97 <= ord(input) <= 122:           #eng
+            return 1  
+        elif 44032 <= ord(input) <= 55215:      #kor 
+            return 1  
+        elif ord(input) == 32:
+            return 2
+        elif ord(input) == 34 or ord(input) == 39 or ord(input) == 8220:
+            return 1
+        else:
+            return 3     
+   
             
    
    

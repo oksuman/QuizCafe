@@ -12,6 +12,8 @@ with open('pdf/samples/open.pdf', 'rb') as input_file:
                     print(size)
                     crop = page_plumber.crop(box)
                     image_file = crop.to_image(resolution = 400)
+                    print(image_file)
+                    print(type(image_file))
                     image_file.save('output.png')         
                     print('x0' + str(image['x0']))           
                     print('x1' + str(image['x1']))           
