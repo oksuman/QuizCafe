@@ -348,43 +348,43 @@ class Pdf2Json:
             return -1
 
         temp = page_cells[0]
-        # if temp.symbol_start:
+        if temp.symbol_start:
         # 형제로 
-        if abs(temp.size - cur_size) < 0.1 and abs(temp.x0 - cur_loc) < temp.size/2:
-            temp = page_cells.pop(0)
-            temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
-            parent_cell['sentences'].append(temp_cell)
-            return_code = self.layering(parent_cell, temp_cell, temp.size, temp.x0, page_cells)
-            if return_code == 1:
-                return 1
+            if abs(temp.size - cur_size) < 0.1 and abs(temp.x0 - cur_loc) < temp.size/2:
+                temp = page_cells.pop(0)
+                temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+                parent_cell['sentences'].append(temp_cell)
+                return_code = self.layering(parent_cell, temp_cell, temp.size, temp.x0, page_cells)
+                if return_code == 1:
+                    return 1
 
-        # 자식으로  
-        elif (temp.size <= cur_size or abs(temp.size - cur_size) < 0.1) and temp.x0 > cur_loc:
-            temp = page_cells.pop(0)
-            temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
-            cur_cell['sentences'].append(temp_cell)
-            return_code = self.layering(cur_cell, temp_cell, temp.size, temp.x0, page_cells)
-            if return_code == 1:
-                if abs(page_cells[0].size - cur_size) < 1 and abs(page_cells[0].x0 - cur_loc) < 0.1:
-                    temp = page_cells.pop(0)
-                    temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
-                    parent_cell['sentences'].append(temp_cell)
-                    return_code = self.layering(parent_cell, temp_cell, temp.size, temp.x0, page_cells)
-                    if return_code == 1:
-                        return 1
-                            
-                elif page_cells[0].size >= cur_size and page_cells[0].x0 < cur_loc:
-                    return 1 
-                else: 
-                    return 0
+            # 자식으로  
+            elif (temp.size <= cur_size or abs(temp.size - cur_size) < 0.1) and temp.x0 > cur_loc:
+                temp = page_cells.pop(0)
+                temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+                cur_cell['sentences'].append(temp_cell)
+                return_code = self.layering(cur_cell, temp_cell, temp.size, temp.x0, page_cells)
+                if return_code == 1:
+                    if abs(page_cells[0].size - cur_size) < 1 and abs(page_cells[0].x0 - cur_loc) < 0.1:
+                        temp = page_cells.pop(0)
+                        temp_cell = {'text' : temp.text, 'keywords' : temp.keyword_set, 'sentences' : []}
+                        parent_cell['sentences'].append(temp_cell)
+                        return_code = self.layering(parent_cell, temp_cell, temp.size, temp.x0, page_cells)
+                        if return_code == 1:
+                            return 1
+                                
+                    elif page_cells[0].size >= cur_size and page_cells[0].x0 < cur_loc:
+                        return 1 
+                    else: 
+                        return 0
+                
+            elif temp.size >= cur_size and temp.x0 < cur_loc:
+                return 1
             
-        elif temp.size >= cur_size and temp.x0 < cur_loc:
-            return 1
-        
+            else:
+                return 0
         else:
-            return 0
-        #else:
-        #    return 0
+           return 0
         
     def divide_by_topic(self):
         self.TopicList.append(self.CellList.popleft())
