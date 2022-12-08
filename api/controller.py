@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, UploadFile
 from fastapi.responses import JSONResponse
 
-from service import QuizListResponse, get_quizzes
+from api.service import QuizListResponse, get_quizzes
 
 router = APIRouter(tags=["quiz"])
 

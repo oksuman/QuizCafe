@@ -1,9 +1,12 @@
-from eunjeon import Mecab
+from mecab import MeCab
 import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
+from pororo import Pororo
 from collections import defaultdict
 
-mecab = Mecab()
+mecab = MeCab()
+# nltk.download('punkt')
+# nltk.download('averaged_perceptron_tagger')
 
 
 def detect_language(text):
@@ -21,7 +24,7 @@ def get_ngrams(data, min_count=3, n_range=(2, 3)):
         for b in range(0, len(words) - n + 1):
             all_noun = True
             for i in range(b, b+n):
-                if words[i][1][0] != 'N':
+                if words[i][1][0] != 'N' or not words[i][0].isalpha():
                     all_noun = False
                     break
             if all_noun:
@@ -31,7 +34,13 @@ def get_ngrams(data, min_count=3, n_range=(2, 3)):
     n_begin, n_end = n_range
     ngram_counter = defaultdict(int)
 
-    docs = [t["Text"] for d in data for t in d["Texts"]]
+    docs = []
+    for d in data:
+        for sent in d["sentences"]:
+            docs.append(sent["text"])
+            for s in sent["sentences"]:
+                docs.append(s["text"])
+
     for doc in docs:
         if detect_language(doc) == "korean":
             words = mecab.pos(doc)
@@ -57,7 +66,15 @@ def tokenizer(text):
 
 
 def tf_idf(data):
-    corpus = [' '.join([t["Text"] for t in d["Texts"]]) for d in data]
+    corpus = []
+    for d in data:
+        text = ""
+        for sent in d["sentences"]:
+            text += sent["text"]
+            for s in sent["sentences"]:
+                text += s["text"]
+        corpus.append(text)
+
     tfidfv = TfidfVectorizer(tokenizer=tokenizer, ngram_range=(1, 2))
     sp_matrix = tfidfv.fit_transform(corpus)
 
@@ -66,7 +83,7 @@ def tf_idf(data):
         word2id[feature] = idx
 
     for i, sentence in enumerate(corpus):
-        print(f"- {data[i]['Theme']}")
+        print(f"- {data[i]['topic']}")
         if detect_language(sentence) == "korean":
             tokens = mecab.nouns(sentence)
         else:
@@ -74,3 +91,15 @@ def tf_idf(data):
                       if pos[0] == 'N' and ord('a') <= ord(word[0].lower()) <= ord('z')]
         print(sorted(list(set([(token, sp_matrix[i, word2id[token]]) for token in tokens])), key=lambda x: x[1], reverse=True))
     return data
+
+
+ko_ner = Pororo(task="ner", lang="ko")
+en_ner = Pororo(task="ner", lang="en")
+
+
+def ner_tagger(doc):
+    if detect_language(doc) == "korean":
+        ner = ko_ner(doc)
+    else:
+        ner = en_ner(doc)
+    return ner

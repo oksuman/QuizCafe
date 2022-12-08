@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from controller import quiz_router
+from api.controller import quiz_router
 
 
 def create_app():
