@@ -298,6 +298,9 @@ class Pdf2Json:
                         max_index = index      
                 index += 1
             else:
+                if(len(current_page_cells) == 0):
+                    continue
+                
                 max_cell_text = current_page_cells.pop(max_index)
                 max_cell = {'topic' : max_cell_text.text.strip(), 'keywords' : max_cell_text.keyword_set,'file' : "" ,'page' : [max_cell_text.page_num],'sentences' : []}
     
