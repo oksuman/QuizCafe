@@ -9,7 +9,7 @@ router = APIRouter(tags=["quiz"])
 
 @router.post(path="/quiz", response_model=QuizListResponse)
 async def upload_pdf(files: List[UploadFile]):
-    files = [await file.read() for file in files]
+    files = [(await file.read(), file.filename) for file in files]
     result = get_quizzes(files)
 
     return JSONResponse(

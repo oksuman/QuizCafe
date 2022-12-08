@@ -23,15 +23,14 @@ class Pdf2Json:
     def pdf_to_data(self):
         for file in self.FileSet:
             self.color_list = {}
-            file_name = self.read_pdf(file)
+            self.read_pdf(file[0])
             self.textline_layering()
             self.divide_by_topic()
             for topic in self.TopicList:
-                topic['file'] = file_name
+                topic['file'] = file[1]
 
     def read_pdf(self, FileString: string):
         input_file = BytesIO(FileString)
-        file_name = input_file.name
         with pdfplumber.PDF(input_file) as pdf_file:
             for page_miner, page_plumber in zip(extract_pages(input_file), pdf_file.pages):
 
@@ -87,8 +86,6 @@ class Pdf2Json:
 
             if pending_list:
                 pending_list.clear()
-
-        return file_name
 
     def detect_diff(self, chars, textline, index, page_num, default_color, bold_check):
         current_color = default_color

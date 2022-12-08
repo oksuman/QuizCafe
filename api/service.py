@@ -41,7 +41,7 @@ def get_quizzes(files):
         if topic.lower() in ["목차", "개요", "topics"] or len(topic) >= 30:
             continue
         source = d["file"]
-        source += f"p{d['page'][0]}" if len(d["page"]) == 1 else f"p{d['page'][0]}-{d['page'][-1]}"
+        source += f" p{d['page'][0]}" if len(d["page"]) == 1 else f" p{d['page'][0]}-{d['page'][-1]}"
 
         for sent in d["sentences"]:
             has_blank = False
