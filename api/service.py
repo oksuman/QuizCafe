@@ -40,7 +40,8 @@ def get_quizzes(files):
         topic = d["topic"]
         if topic.lower() in ["목차", "개요", "topics"] or len(topic) >= 30:
             continue
-        pages = d["page"][0] if len(d["page"]) == 1 else f"{d['page'][0]}-{d['page'][-1]}"
+        source = d["file"]
+        source += f"p{d['page'][0]}" if len(d["page"]) == 1 else f"p{d['page'][0]}-{d['page'][-1]}"
 
         for sent in d["sentences"]:
             has_blank = False
@@ -79,7 +80,7 @@ def get_quizzes(files):
                         sent = siblings[idx]
             if has_blank:
                 if len(re.sub(r"[^가-힣a-zA-Z0-9\s]", "", sentence.replace('[blank]', '')).split()) >= 5:
-                    quizzes.append(Quiz(quiz_num=quiz_num, topic=topic, sentence=sentence, answers=answers, pages=pages))
+                    quizzes.append(Quiz(quiz_num=quiz_num, topic=topic, sentence=sentence, answers=answers, source=source))
                     quiz_num += 1
             else:
                 keywords = []
@@ -96,7 +97,7 @@ def get_quizzes(files):
                         break
                 if len(keywords) > 0:
                     if len(re.sub(r"[^가-힣a-zA-Z0-9\s]", "", sentence.replace('[blank]', '')).split()) >= 5:
-                        quizzes.append(Quiz(quiz_num=quiz_num, topic=topic, sentence=sentence, answers=keywords, pages=pages))
+                        quizzes.append(Quiz(quiz_num=quiz_num, topic=topic, sentence=sentence, answers=keywords, source=source))
                         quiz_num += 1
                 else:
                     ner = ner_tagger(sentence)
@@ -108,7 +109,7 @@ def get_quizzes(files):
                         print(sentence, keywords)
                         sentence = sentence.replace(keyword, "[blank]", 1)
                     if len(keywords) > 0 and len(re.sub(r"[^가-힣a-zA-Z0-9\s]", "", sentence.replace('[blank]', '')).split()) >= 5:
-                        quizzes.append(Quiz(quiz_num=quiz_num, topic=topic, sentence=sentence, answers=keywords, pages=pages))
+                        quizzes.append(Quiz(quiz_num=quiz_num, topic=topic, sentence=sentence, answers=keywords, source=source))
                         quiz_num += 1
 
     return QuizListResponse(
