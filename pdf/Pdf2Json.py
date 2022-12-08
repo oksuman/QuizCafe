@@ -24,10 +24,8 @@ class Pdf2Json:
         for file in self.FileSet:
             self.color_list = {}
             self.read_pdf(file[0])
-            self.textline_layering()
+            self.textline_layering(file[1])
             self.divide_by_topic()
-            for topic in self.TopicList:
-                topic['file'] = file[1]
 
     def read_pdf(self, FileString: string):
         input_file = BytesIO(FileString)
@@ -222,7 +220,7 @@ class Pdf2Json:
         return index
        
     # TextLine을 Cell로 바꾸기
-    def textline_layering(self):
+    def textline_layering(self, file_name):
         cell_text = self.TextList.popleft()
         current_page_cells = []
         current_page_cells.append(cell_text)
@@ -293,7 +291,7 @@ class Pdf2Json:
                     continue
                 
                 max_cell_text = current_page_cells.pop(max_index)
-                max_cell = {'topic': max_cell_text.text.strip(), 'keywords': max_cell_text.keyword_set, 'file': "", 'page': [max_cell_text.page_num], 'sentences': []}
+                max_cell = {'topic': max_cell_text.text.strip(), 'keywords': max_cell_text.keyword_set, 'file': file_name, 'page': [max_cell_text.page_num], 'sentences': []}
     
                 # layering 
                 while current_page_cells:
@@ -318,7 +316,7 @@ class Pdf2Json:
                 
         if current_page:
             max_cell_text = current_page_cells.pop(max_index)
-            max_cell = {'topic': max_cell_text.text, 'keywords': max_cell_text.keyword_set, 'page': [max_cell_text.page_num], 'sentences': []}
+            max_cell = {'topic': max_cell_text.text, 'keywords': max_cell_text.keyword_set, 'file': file_name, 'page': [max_cell_text.page_num], 'sentences': []}
 
             # layering 
             while current_page_cells:
