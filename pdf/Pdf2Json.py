@@ -13,7 +13,7 @@ from Default import *
 
 class Pdf2Json:
     def __init__(self, _FileSet : list):
-        self.MAX_COUNT : final = 50                      # max pending counting
+        self.MAX_COUNT : final = 30                      # max pending counting
         self.FileSet = _FileSet
         self.TextList = deque()                          # list of TextLine
         self.CellList = deque()
@@ -24,18 +24,21 @@ class Pdf2Json:
     def pdf_to_data(self):
         for file in self.FileSet:
             self.color_list = {}
-            self.read_pdf(file)
+            file_name = self.read_pdf(file)
             self.textline_layering()
             self.divide_by_topic()
+            for topic in self.TopicList:
+                topic['file'] = file_name
             
             with open('output.json', 'w', encoding="utf-8") as output:
                 json.dump(self.TopicList, output, ensure_ascii=False, indent='\t')   
 
     def read_pdf(self, FileString : string):
         with open(FileString, 'rb') as input_file:
+            file_name = input_file.name
             with pdfplumber.PDF(input_file) as pdf_file:
                 for page_miner, page_plumber in zip(extract_pages(input_file), pdf_file.pages):
-            
+                    
                     chars_plumber = page_plumber.chars
                     index = 0                       # index for indicating character page_plumber
 
@@ -44,7 +47,7 @@ class Pdf2Json:
                     pending_list = []
                     # list of pending_textline
                     # for unmatched textline between pdfminer and pdfplumber
-                    pending_count = 0 
+                    pending_count = 0  
 
                     for element in page_miner:
                         if isinstance(element, LTTextBox):
@@ -70,7 +73,7 @@ class Pdf2Json:
                                 index = self.detect_diff(chars_plumber, textline, index, page_number, page_default_color, bold_check)
                             except: 
                                 pending_list.append(textline)
-                                continue
+                                
                 
                         else:
                             pending_list.append(textline) 
@@ -90,8 +93,8 @@ class Pdf2Json:
                  
                 if pending_list:
                     pending_list.clear()
-                    print(page_plumber.page_number)
-                    print('pdf extracion is not perfect !!')  
+
+        return file_name
 
     def detect_diff(self, chars, textline, index, page_num, default_color, bold_check):
         current_color = default_color
@@ -296,7 +299,7 @@ class Pdf2Json:
                 index += 1
             else:
                 max_cell_text = current_page_cells.pop(max_index)
-                max_cell = {'topic' : max_cell_text.text.strip(), 'keywords' : max_cell_text.keyword_set, 'page' : [max_cell_text.page_num],'sentences' : []}
+                max_cell = {'topic' : max_cell_text.text.strip(), 'keywords' : max_cell_text.keyword_set,'file' : "" ,'page' : [max_cell_text.page_num],'sentences' : []}
     
                 # layering 
                 while current_page_cells:
@@ -397,35 +400,7 @@ class Pdf2Json:
                 
             else:
                 self.TopicList.append(temp)
-                
-    ## 해당 input이 특수문자인지 확인
-    # 첫 글자가 숫자인 경우는 두번째 글자도 확인 -> 두번째가 특수문자면 특수문자 취급
-    # 
-    # def is_special_symbol(self, input1, input2):
-    #     if 48 <= ord(input1) <= 57:              #digit 
-    #         if input2 == 'None':
-    #             return False
-    #         else:
-    #             if self.is_special_symbol(input2, 'None'):
-    #                 return True
-    #             else:
-    #                 return False   
-    #     elif 65 <= ord(input1) <= 90:            #eng
-    #         return False  
-    #     elif 97 <= ord(input1) <= 122:           #eng
-    #         return False  
-    #     elif 44032 <= ord(input1) <= 55215:      #kor 
-    #         return False  
-    #     elif ord(input1) == 10 or ord(input1) == 32 or ord(input1) == 34 or ord(input1) == 39 or ord(input1) == 8220:
-    #         return False
-    #     else:
-    #         return True       
 
-    ### Return code
-    # 0 : digit
-    # 1 : eng /kor/ etc.. 
-    # 2 : blank space 
-    # 3 : special symbol
     def is_special_symbol(self, input):
         if 48 <= ord(input) <= 57:              #digit 
             return 0  
