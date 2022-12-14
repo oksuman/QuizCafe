@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QuizCafe</title>
+    <link rel="stylesheet" href="textstyle.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+</head>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<style>
+    html {
+        font-family: var(--globalfont);
+    }
+
+    header {
+        align-items: center;
+        margin-bottom: 60px;
+        margin-left: 50px;
+        padding-top: 20px;
+    }
+
+    #title {
+        margin: auto;
+        color: var(--maincolor);
+        background-color: (--backgroundcolor);
+        font-weight: bold;
+        font-size: 4.0em;
+        white-space: nowrap;
+    }
+
+    #title button {
+        align-items: center;
+        font-weight: bold;
+        font-size: 70px;
+        color: var(--maincolor);
+        background-color:transparent;
+        border: 0;
+
+    }
+
+    main {
+        margin: auto;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        align-items: center;
+    }
+
+    #buttonframeP {
+        text-align: center;
+    }
+
+    #buttonframeN {
+        text-align: center;
+    }
+
+    #buttonframeP button {
+        font-weight: bold;
+        font-size: 100px;
+        color: var(--maincolor);
+        background-color:transparent;
+        border: 0;
+    }
+
+    #buttonframeP button:hover 
+    {
+        color: var(--mouseovercolor);
+    }
+
+    #buttonframeN button {
+        font-weight: bold;
+        font-size: 100px;
+        color: var(--maincolor);
+        background-color:transparent;
+        border: 0;
+    }
+
+    #buttonframeN button:hover {
+        color: var(--mouseovercolor);
+    }
+
+    #mainframe {
+        align-items: center;
+    }
+
+    #questionbox {
+        display: grid;
+        grid-template-columns: 4fr 1fr;
+        width: 1024px;
+        height: 490px;
+        border: 7px solid var(--maincolor);
+        border-radius: 40px;
+        background-color: white;
+        padding: 50px;
+        overflow-y:auto;
+    }
+
+    #questionbox input {
+        align-items: center;
+        text-align: center;
+        font-weight: bold;
+        font-size: 20px;
+        color: var(--maincolor);
+        background-color: white;
+        border: 1px solid var(--maincolor);
+        margin-right: 5px;
+        margin-left: 5px;
+        font : var(--globalfont);
+    }
+
+    #questionbox input:focus {
+        outline: var(--maincolor);
+    }
+
+    #topic {
+        color: var(--maincolor);
+        background-color: white;
+        font-weight: bold;
+        font-size: 40px;
+    }
+
+    #quiz_num {
+        text-align: end;
+        color: var(--maincolor);
+        background-color: white;
+        font-weight: 400;
+        font-size: 40px;
+    }
+
+    #question {
+        grid-column-start: 1;
+        grid-column-end: 3;
+        grid-row-start: 2;
+        grid-row-end: 3;
+        color: black;
+        background-color: white;
+        font-weight: bold;
+        font-size: 25px;
+        align-items: center;
+    }
+
+    #checkout {
+        background: transparent;
+        border: 0;
+        display: block;
+    }
+
+    #skip {
+        background: transparent;
+        border: 0;
+        float: left;
+    }
+
+    /* #skip:hover:enabled {
+        
+    } */
+
+    #border {
+        color: var(--maincolor);
+        background-color: white;
+        font-weight: bold;
+        font-size: 40px;
+        border: 2px;
+        border-style: solid;
+        border-color: (--maincolor);
+    }
+    
+    .footer {margin:0 auto; text-align:center;}
+
+
+    #buttonarr {
+        display: flex;  
+        align-items: center;
+        justify-content: center    }
+
+    #buttonarr button {
+        text-align: center;
+        margin: 40px 40px 0 0px;
+    }
+
+    input:focus{background-color: white;}
+    
+
+</style>
+
+<body>
+    <header>
+        <div id="title">
+            <button type="button" onClick="location.href='index.html'">Quiz Cafe</button>
+        </div>
+    </header>
+    <main>
+        <div id="buttonframeP">
+            <button id="prev_btn"> < </button>
+        </div>
+        <div id="mainframe">
+            <div id="questionbox">
+                <div id="topic">
+                    <p id="topic"></p>
+                </div>
+                <div id="quiz_num">
+                    <p id="quiz_num"></p>
+                </div>
+                <div id="question">
+                    <p id="quiz"></p>
+                </div>
+            </div>
+        </div>
+        <div id="buttonframeN">
+            <button id="next_btn"> > </button>
+        </div>
+        <div></div>
+        <div id="buttonarr">
+            <span id="trashS"><button id="skip" style="width:210px;  height:70px;""><img id="skipI" src="trash.png" onMouseOver="this.src='trash_mouseover.png'" onMouseOut="this.src='trash.png'"style="width:210px; height:70px; -webkit-user-drag: none;"></button></span>
+            <span id="checkoutS"><button id="checkout" disabled onClick="location.href='result.html'" style = "width:210px; height:70px;"><img id="checkoutI" src="check_blocked.png" style="width:210px; height:70px; -webkit-user-drag: none;"></button></span>
+        </div>
+        <div></div>
+    </main>
+    <script type="text/javascript" src="test3.js"></script>
+</body>
+</html>
+  

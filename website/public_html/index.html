@@ -97,7 +97,6 @@
 
     div #uploadB {
         display: none;
-        
     }
 
     div #uploadB button {
@@ -105,14 +104,10 @@
         height: 40px;
         border-radius: 5px;
         font-weight: bold;
-        font:var(--globalfont);
         color: white;
         background-color: var(--maincolor);
         border: 1px solid var(--maincolor);
         font-size: 20px;
-        position: relative;
-        margin-left: 5px;
-        top:-40px;
     }
 
     #uploadB button:hover {
@@ -125,7 +120,7 @@
         height: 50px;
         width: 50px;
         position: relative;
-        bottom: 120px;
+        bottom: 60px;
         left : 310px;
     }
 
@@ -147,8 +142,8 @@
         border: 1px solid var(--maincolor);
         border-radius: 5px;
         font-size: 20px;
+        margin-top: 40px;
         margin-left: 5px;
-        font:var(--globalfont);
     }
 
     #startB button:hover {
@@ -169,9 +164,9 @@
         background-color: var(--maincolor);
         border: 1px solid var(--maincolor);
         border-radius: 5px;
+        margin-top: 40px;
         margin-left: 5px;
         font-size: 20px;
-        font:var(--globalfont);
     }
 
     #reuploadB button:hover {
@@ -198,7 +193,6 @@
     }
 
     #loading{
-        white-space: nowrap;
         display: none;
         position: absolute; 
         color: (--maincolor);
@@ -208,16 +202,13 @@
         margin-top: 250px;
     }
 
-    #error{
-        width: 360px;
-    }
-
     #notpdf{
         display: none;
         font-size: 15px;
         font-weight: 700;
         color:red;
-        padding-left: 80px;
+        position: relative;
+        text-align: center;
     }
 
     #manypdf{
@@ -225,7 +216,8 @@
         font-size: 15px;
         font-weight: 700;
         color:red;
-        padding-left: 60px;
+        position: relative;
+        text-align: center;
     }
 
     div #success{
@@ -255,12 +247,6 @@
         color: var(--mouseovercolor);
     }
 
-    #etc {
-        margin: auto;
-        display: grid;
-        grid-template-rows: 10fr 1fr;
-    }
-
 </style>
 <body>
     <main>
@@ -271,28 +257,24 @@
         <div class="fileBox">
             <form id="fileForm" name="fileForm" enctype="multipart/form-data" method="post">
                 <div id="total">
-                    <div id = "etc">
-                        <div id="fileDrop">
-                            <div id="div_load_image"
-                            style="position:relative;  right:40%; top:15%; width:0px;height:0px; z-index:9999; background:#f0f0f0; filter:alpha(opacity=50); opacity:alpha*0.5; margin:auto; padding:0; text-align:center; display: none;">
-                            <img src="loading.gif" style="width:300px; height:auto; -webkit-user-drag: none;">
-                            </div>
-                            <p id ="loading">문제 생성 중...</p>
-                            <div id ="success"><img src="success.png" style="width: 180px; height: 180px; -webkit-user-drag: none;"></div>
-                            <div id = "fail"><img src="fail.png" style="width: 180px; height: 180px; -webkit-user-drag: none;"></div>
-                            <div><p id="quizNum"></p></div>
-                            <div id="inborder">
-                                <label for="plus">
-                                    <div><img src="fileupload.png"  onMouseOver="this.src='file_mouseover.png'" onMouseOut="this.src='fileupload.png'"style="width: 160px; height: 180px; -webkit-user-drag: none;"></div>
-                                    <input type="file" name="file" id="plus" accept=".pdf" multiple>
-                                </label>
-                                <p> 또는 드래그하여 파일을 추가하세요.<br>5개까지 추가할 수 있습니다.</p>
-                            </div>
+                    <div id="fileDrop">
+                        <div id="div_load_image"
+                        style="position:relative;  right:40%; top:15%; width:0px;height:0px; z-index:9999; background:#f0f0f0; filter:alpha(opacity=50); opacity:alpha*0.5; margin:auto; padding:0; text-align:center; display: none;">
+                        <img src="loading.gif" style="width:300px; height:auto; -webkit-user-drag: none;">
                         </div>
-                        <div id ="error">
-                            <p id ="notpdf">pdf 파일만 추가할 수 있습니다</p>
-                            <p id ="manypdf">파일은 5개까지만 추가할 수 있습니다</p>
+                        <p id ="loading">문제 생성 중...</p>
+                        <div id ="success"><img src="success.png" style="width: 180px; height: 180px; -webkit-user-drag: none;"></div>
+                        <div id = "fail"><img src="fail.png" style="width: 180px; height: 180px; -webkit-user-drag: none;"></div>
+                        <div><p id="quizNum"></p></div>
+                        <div id="inborder">
+                            <label for="plus">
+                                <div><img src="fileupload.png"  onMouseOver="this.src='file_mouseover.png'" onMouseOut="this.src='fileupload.png'"style="width: 160px; height: 180px; -webkit-user-drag: none;"></div>
+                                <input type="file" name="file" id="plus" accept=".pdf" multiple>
+                            </label>
+                            <p> 또는 드래그하여 파일을 추가하세요.<br>5개까지 추가할 수 있습니다.</p>
                         </div>
+                        <p id ="notpdf">pdf 파일만 추가할 수 있습니다</p>
+                        <p id ="manypdf">파일은 5개까지만 추가할 수 있습니다</p>
                     </div>
                     <div id="plusB">
                         <label for="plus">

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizCafe</title>
+    <link rel="stylesheet" href="textstyle.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+</head>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+<script type="text/javascript" src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<style>
+    html {
+        font-family: var(--globalfont);
+    }
+
+    header {
+        align-items: center;
+        margin-bottom: 60px;
+        margin-left: 50px;
+        padding-top: 20px;
+    }
+
+    #top {
+        margin: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    #pdfDiv {
+        margin: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap : 100px;
+    }
+
+    #title {
+        color: var(--maincolor);
+        background-color: (--backgroundcolor);
+        font-weight: bold;
+    }
+
+    #title button {
+        align-items: center;
+        font-weight: bold;
+        font-size: 70px;
+        color: var(--maincolor);
+        background-color:transparent;
+        border: 0;
+
+    }
+
+
+    #score {
+        color: var(--maincolor);
+        background-color: (--backgroundcolor);
+        font-weight: bold;
+        font-size: 40px;
+        padding-top: 20px;
+        margin-left: 60px;
+        float: right;
+        margin-right: 100px;
+    }
+
+
+    #quiz_num {
+        color: var(--maincolor);
+        background-color: (--backgroundcolor);
+        font-weight: bold;
+        font-size: 20px;
+        padding-top: 20px;
+        margin-left: 60px;
+    }
+
+    #quiz {
+        color: var(--maincolor);
+        font-size: 20px;
+        font-weight: 500;
+        margin-left: 80px;
+        margin-top: 10px;
+    }
+
+    #answer {
+        color: white;
+        background-color: var(--maincolor);
+        border: 1px solid var(--maincolor);
+        border-radius: 3px;
+        margin-left: 80px;
+        margin-top: 10px;
+        font-weight: 300;
+    }
+
+    #norm {
+        color: var(--maincolor);
+        font-weight: 500;
+    }
+
+
+    #myanswer {
+        color: var(--maincolor);
+        margin-left: 80px;
+        margin-top: 10px;
+        margin-bottom: 50px;
+    }
+
+    #img {
+        margin-left: 20px;
+        margin-bottom: 10px;
+    }
+
+    #img2 {
+        margin-left: 12px;
+    }
+
+    #correctanswer {
+        font-size: 15px;
+        font-weight: bold;
+        color: (--maincolor);
+        border: 2px;
+        border-style: solid;
+        border-color: (--maincolor);;
+        display: inline-block;
+        padding-left: 5px;
+        padding-right: 5px;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    #wronganswer {
+        font-size: 20px;
+        font-weight: bold;
+        color: red;
+        border: 2px;
+        border-style: solid;
+        border-color: (--maincolor);
+        display: inline-block;
+        padding-left: 5px;
+        padding-right: 5px;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+   #testpaper {
+        text-align: center;
+        margin-left: 300px;
+    }
+
+    #testpaper button {
+        width: 200px;
+        height: 40px;
+        align-items: center;
+        font-weight: bold;
+        color: white;
+        background-color: transparent;
+        border: transparent;
+        border-radius: 5px;
+        margin-top: 40px;
+        font-size: 20px;
+    }
+
+    #answerlist{
+        display: none;
+    }
+
+    #list{
+        margin-left: 30px;
+        margin-right: 30px;
+    }
+
+</style>
+<body>
+    <header>
+        <div id="title">
+            <button type="button" onClick="location.href='index.html'">Quiz Cafe</button>
+        </div>
+    </header>
+    <main>
+        <div id="top">
+            <div></div>
+        <div id="testpaper"> 
+            <button type="button" id="savePdf"><img src="download.png"  onMouseOver="this.src='download_mouseover.png'" onMouseOut="this.src='download.png'"style="width: 210px; height: 70px; -webkit-user-drag: none;"></button> 
+        </div>
+        </div>
+        <div id="pdfDiv">
+            <div id="list">
+                <div>
+                    <p id="quizlist"></p>
+                </div>
+            </div>
+            <div id="list">
+                <div>
+                    <p id="quizlist2"></p>
+                </div>
+            </div>
+            <div>
+                <p id="answerlist"></p>
+            </div>
+        </div>
+    </main>
+<script type="text/javascript" src="quizlist2.js"></script>
+</body>
+</html>

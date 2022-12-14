@@ -1,0 +1,26 @@
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-color: #f8f9f9;
+}
+
+#plus {
+  display: none;
+}
+
+:root {
+  --maincolor: #212f3d;
+  --mouseovercolor: #566573;
+  --backgroundcolor : #f8f9f9;
+  --globalfont : 'GmarketSansMedium';
+}
+
+@font-face {
+  font-family: 'GmarketSansMedium';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
